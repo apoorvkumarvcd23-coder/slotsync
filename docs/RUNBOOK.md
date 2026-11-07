@@ -53,6 +53,14 @@ PostgreSQL data when stopped. Do not regenerate a secret while keeping its old
 database volume: PostgreSQL's initialization password applies only to an empty
 volume. Docker Compose `down` without `--volumes` preserves that data.
 
+On Linux/macOS the generator enforces a private `0700` `.secrets` directory and
+a read-only `0444` secret file. Compose file secrets are bind mounts, so the
+file must be readable by the app container's different non-root UID. The private
+parent directory blocks access by other host users; it is not mounted into the
+container. Do not copy the secret file to a shared directory. Windows uses the
+workspace's inherited access controls. Re-run the generator after upgrading an
+earlier foundation checkout to fix Linux permissions without changing the secret.
+
 For a deliberately disposable fresh demo, use a **new Compose project name**
 (for example `docker compose -p slotsync-fresh up --build --wait`). This creates
 an independent database volume without deleting the original. Stop the first
