@@ -1,5 +1,17 @@
 # SlotSync — December 2026 implementation plan
 
+## Immediate core milestone — 17 November 2026
+
+The core is needed for resume demonstrations within the next ten days; December
+is the extension/hardening phase. Build a working Java/Spring/PostgreSQL/React
+slice with seeded roles, database-enforced conflict checks, idempotent bookings,
+approval/cancel flow, basic configurable duration/approval policy, resource CSV
+preview/apply and audit/UAT evidence. Core work is scheduled on 7, 9, 13 and
+16 November, with final acceptance on 17 November. Richer mapping/policy rules,
+load testing and full v1 hardening follow afterwards. A health endpoint alone
+is not the resume-ready core. The detailed table below describes full v1
+capabilities; partial core slices do not automatically complete every v1 item.
+
 ## Starting point and purpose
 
 No SlotSync repository or implementation was found in the connected GitHub

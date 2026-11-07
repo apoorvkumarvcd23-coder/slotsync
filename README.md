@@ -10,7 +10,8 @@ idempotent reservations, configurable policies, approval workflows, validated CS
 resource imports and an auditable handover/UAT workflow.
 
 See [the implementation plan](docs/IMPLEMENTATION_PLAN.md) for the architecture,
-task sequence and release acceptance. The delivery target is 31 December 2026.
+task sequence and release acceptance. The core demo target is **17 November 2026**, followed by feature delivery and
+hardening through **31 December 2026**.
 Features become implemented only when their tests and demonstration pass.
 
 ## Intended demo
