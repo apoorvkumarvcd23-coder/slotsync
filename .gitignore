@@ -12,3 +12,10 @@ coverage/
 .idea/
 *.iml
 .DS_Store
+.secrets/
+test-results/
+playwright-report/
+*.tsbuildinfo
+*.db
+*.sqlite
+*.sqlite3

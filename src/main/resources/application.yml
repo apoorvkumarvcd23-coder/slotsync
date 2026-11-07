@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: slotsync
+  datasource:
+    url: ${SLOTSYNC_DB_URL:jdbc:postgresql://localhost:5432/slotsync}
+    username: ${SLOTSYNC_DB_USER:slotsync}
+    password: ${SLOTSYNC_DB_PASSWORD:}
+    hikari:
+      connection-timeout: 5000
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.time_zone: UTC
+  flyway:
+    enabled: true
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+server:
+  error:
+    include-message: never
+    include-stacktrace: never
+  servlet:
+    session:
+      cookie:
+        http-only: true
+        same-site: lax
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
+      probes:
+        enabled: true
+      group:
+        readiness:
+          include: readinessState,db

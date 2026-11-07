@@ -1,0 +1,38 @@
+name: slotsync-checks
+services:
+  test-db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: slotsync_test
+      POSTGRES_USER: slotsync_test
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets:
+      - postgres_password
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U slotsync_test -d slotsync_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  check:
+    image: maven:3.9.11-eclipse-temurin-21
+    working_dir: /workspace
+    volumes:
+      - .:/workspace
+      - maven-cache:/root/.m2
+    environment:
+      SLOTSYNC_TEST_DB_URL: jdbc:postgresql://test-db:5432/slotsync_test
+      SLOTSYNC_TEST_DB_USER: slotsync_test
+    secrets:
+      - postgres_password
+    command: ["sh", "-ec", "export SLOTSYNC_TEST_DB_PASSWORD=$$(cat /run/secrets/postgres_password); ./mvnw -B -ntp verify"]
+    depends_on:
+      test-db:
+        condition: service_healthy
+secrets:
+  postgres_password:
+    file: ./.secrets/postgres_password
+volumes:
+  maven-cache:
+    name: slotsync-maven-cache

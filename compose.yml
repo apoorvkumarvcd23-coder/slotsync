@@ -1,0 +1,43 @@
+name: slotsync
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: slotsync
+      POSTGRES_USER: slotsync
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+    secrets:
+      - postgres_password
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U slotsync -d slotsync"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  app:
+    build: .
+    ports:
+      - "127.0.0.1:${SLOTSYNC_HTTP_PORT:-8080}:8080"
+    environment:
+      SLOTSYNC_DB_URL: jdbc:postgresql://db:5432/slotsync
+      SLOTSYNC_DB_USER: slotsync
+      SPRING_CONFIG_IMPORT: configtree:/run/secrets/
+    secrets:
+      - source: postgres_password
+        target: spring.datasource.password
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/actuator/health/readiness"]
+      interval: 5s
+      timeout: 8s
+      retries: 30
+      start_period: 30s
+    mem_limit: 512m
+secrets:
+  postgres_password:
+    file: ./.secrets/postgres_password
+volumes:
+  database:
