@@ -12,12 +12,14 @@ flowchart LR
 
 The frontend is compiled into the application JAR during the Docker build. The
 catalogue endpoint returns active resources ordered by stable code, without
-account fields. It has no mutation endpoint. Spring Security permits only the
-catalogue, static assets and health GETs; all other requests are denied and CSRF
-remains enabled. Session authentication is not implemented in this slice.
+account fields. The catalogue itself is read-only. Static/catalogue/health/session
+GETs are public; requester booking writes require a session, role/ownership checks
+and CSRF. Unimplemented routes stay closed. See [the booking API guide](BOOKING_API.md).
 
-V1 creates resource types, resources, users and bookings. There are no seeded
-accounts or committed passwords. V2 adds only synthetic campus resources. JPA
+V1 creates resource types, resources, users and bookings. No passwords are
+committed. V2 adds only synthetic campus resources. V3 adds actor-scoped
+replay responses and audit events. Optional generated demo accounts are seeded
+with BCrypt hashes when the Docker configuration enables them. JPA
 validates its mapped schema rather than creating tables. Flyway history owns
 migration versions; never edit an applied migration once published.
 
@@ -26,13 +28,13 @@ The `btree_gist` extension lets PostgreSQL combine resource UUID equality and
 and APPROVED block time; CANCELLED and REJECTED do not. Endpoints are finite,
 non-null and strictly ordered. Timezone offsets represent instants, so changing
 an offset cannot avoid a conflict. This is a database invariant, not a claim of
-a delivered booking endpoint or of measured throughput.
+measured throughput. The requester endpoints use the same invariant.
 
 Raw simultaneous GiST inserts may abort one transaction with overlap SQLSTATE
 `23P01` or deadlock `40P01`. The race test permits only those failures and requires
-exactly one committed row. The future booking service must retry a deadlocked
-transaction with a bound (or serialize per-resource writes), then translate an
-overlap to HTTP 409. This foundation does not yet implement that API behavior.
+exactly one committed row. The booking service serializes per-resource writes,
+retries a deadlocked transaction up to three times, and translates overlaps to
+HTTP 409. Injected SQLSTATE tests verify retry success and exhausted rollback.
 See [PostgreSQL transaction retry guidance](https://www.postgresql.org/docs/17/mvcc-serialization-failure-handling.html).
 
 ## Start, stop and restart

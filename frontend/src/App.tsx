@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import BookingPanel from './BookingPanel';
 
 export type Resource = {
   id: string;
@@ -22,6 +23,8 @@ export default function App() {
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [filter, setFilter] = useState('ALL');
   const [attempt, setAttempt] = useState(0);
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [selectedResource, setSelectedResource] = useState('');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -47,15 +50,16 @@ export default function App() {
   return <>
     <header className="masthead">
       <a className="brand" href="/" aria-label="SlotSync home"><span className="brand-icon" aria-hidden="true">S</span>SlotSync</a>
-      <span className="workspace">Demo campus <span aria-hidden="true">↗</span></span>
+      <button onClick={() => setBookingOpen(value => !value)}>{bookingOpen ? 'Hide bookings' : 'My bookings / Sign in'}</button>
     </header>
     <main>
       <section className="intro" aria-labelledby="page-title">
         <p className="eyebrow">CAMPUS RESOURCE CATALOGUE</p>
         <h1 id="page-title">Space for your<br /><span>next good idea.</span></h1>
         <p className="description">Find a room to bring people together, or the equipment to make it happen.</p>
-        <div className="milestone"><span className="status-dot" aria-hidden="true" />Catalogue preview · Booking opens in a later build</div>
+        <div className="milestone"><span className="status-dot" aria-hidden="true" />Session-based booking · Approval and admin tools in progress</div>
       </section>
+      {bookingOpen && <BookingPanel resources={resources} selectedId={selectedResource} />}
       <section className="catalogue" aria-labelledby="resources-title">
         <div className="catalogue-heading">
           <div><p className="eyebrow">EXPLORE THE CAMPUS</p><h2 id="resources-title">Resources <span className="count">{state === 'ready' ? visible.length : '—'}</span></h2></div>
@@ -72,7 +76,7 @@ export default function App() {
           <div className={`resource-art ${resource.type.toLowerCase()}`} aria-hidden="true"><span>{resource.type === 'ROOM' ? '▦' : '◈'}</span><span className="art-code">{resource.code}</span></div>
           <div className="card-body"><span className="type-label">{resource.type === 'ROOM' ? 'ROOM' : 'EQUIPMENT'}</span>
             <h3>{resource.name}</h3><p className="location">{resource.location}</p>
-            <div className="card-footer"><span>{resource.type === 'ROOM' ? `${resource.capacity} people` : `${resource.capacity} kit`}</span><span className="catalogue-tag">Catalogue only</span></div>
+            <div className="card-footer"><span>{resource.type === 'ROOM' ? `${resource.capacity} people` : `${resource.capacity} kit`}</span><button onClick={() => { setSelectedResource(resource.id); setBookingOpen(true); }}>Book resource</button></div>
           </div>
         </article>)}</div>}
       </section>

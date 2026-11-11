@@ -1,6 +1,6 @@
 # Implemented scope and evidence
 
-This is the CORE01 foundation, not a complete booking release. No v0.1.0/v1.0.0
+This covers CORE01 and the CORE03 requester slice, not a complete release. No v0.1.0/v1.0.0
 tag or production/scale/business-result claim is made.
 
 | Claim | Code | Executable evidence |
@@ -12,16 +12,19 @@ tag or production/scale/business-result claim is made.
 | Adjacent/different-resource bookings and released slots are allowed | V1 exclusion predicate/range bounds | `adjacentSlotsAndDifferentResourcesAreAllowed`, `cancelledAndRejectedSlotsDoNotHoldTime`, `cancellationFreesTimeAndReactivationCannotBypassConstraint` |
 | Two real concurrent database connections leave one reservation | V1 exclusion constraint | `concurrentConnectionsProduceExactlyOneReservation` (one commit; loser aborts with overlap 23P01 or deadlock 40P01) |
 | Invalid, zero-length and infinite intervals are rejected | V1 `valid_booking_interval` | `zeroReversedAndInfiniteIntervalsAreRejected` |
-| Readiness depends on PostgreSQL; no write interface exposed | `application.yml`, `SecurityConfiguration.java` | `readinessIncludesDatabaseAndHidesOperationalDetails`, `writesAreClosedUntilAuthenticatedWorkflowExists` |
+| Readiness depends on PostgreSQL; catalogue mutation stays closed | `application.yml`, `SecurityConfiguration.java` | `readinessIncludesDatabaseAndHidesOperationalDetails`, `writesAreClosedUntilAuthenticatedWorkflowExists` |
 | UI handles errors, retry, empty catalogue and type filter | `frontend/src/App.tsx` | `frontend/src/App.test.tsx`; browser desktop/mobile check |
+| Generated local role accounts use BCrypt; login rotates session and CSRF | `SeedUsers`, `SecurityConfiguration`, `SessionController`, `init_demo.py` | Actual login/CSRF/logout JUnit tests and browser role/session checks |
+| Owner-scoped create/list/cancel API and React forms | `booking/`, `BookingPanel.tsx` | `BookingIT` ownership/cancellation tests and real browser book/conflict/cancel/rebook scenario |
+| Actor-scoped keys replay the original response; changed payload conflicts | `idempotency_requests`, `BookingService.create` | Canonical-offset, different-actor, concurrent replay JUnit tests; browser dropped-response retry |
+| Database conflicts become 409; deadlock retries are whole-transaction and bounded | `BookingService.atomic` and resource/actor locks | Concurrent overlaps, injected 40P01 success and exhausted-budget tests |
+| Booking, replay response and audit commit together | V3 migration, `BookingService` | Audit-trigger failure verifies no booking/key/audit partial write |
 
 ## Remaining core gates
 
-- Seeded hashed-password accounts, login/session/CSRF and requester/approver/admin authorization.
-- Transactional booking create/cancel API/UI, bounded deadlock transaction retry, stable 409 handling and actor-scoped idempotency.
-- Policy configuration, approval/rejection, persisted audit and bounded atomic CSV import.
+- Policy configuration/snapshots, approval/rejection and bounded atomic CSV import.
+- Approver/admin UI and audit browsing.
 - Full five-case UAT, permission/browser matrix and clean-clone acceptance of that complete workflow.
 
-The implementation plan defines these upcoming slices. Passing the constraint
-tests proves database behavior; it does not prove API-level booking semantics,
-idempotency, authentication, approvals or end-to-end UAT.
+The implementation plan defines these upcoming slices. Requester API/session
+checks do not complete approval, policy, import or the full role-based UAT gates.

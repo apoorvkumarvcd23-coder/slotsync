@@ -52,7 +52,7 @@ jobs:
           name: foundation-evidence
           path: |
             target/failsafe-reports/
-            frontend/test-results/
+            frontend/test-results/*.png
           retention-days: 14
       - name: Stop demo
         if: always()

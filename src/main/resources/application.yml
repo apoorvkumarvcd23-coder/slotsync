@@ -26,6 +26,8 @@ server:
       cookie:
         http-only: true
         same-site: lax
+        secure: ${SLOTSYNC_SECURE_COOKIE:false}
+      timeout: 30m
 management:
   endpoints:
     web:

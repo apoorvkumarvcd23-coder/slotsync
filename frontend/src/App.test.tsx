@@ -9,14 +9,14 @@ const resources = [
 const response = (data: unknown) => ({ ok: true, json: async () => data });
 
 describe('resource catalogue', () => {
-  it('loads data, filters rooms and clearly labels the unfinished booking workflow', async () => {
+  it('loads data, filters rooms and links the session booking workflow', async () => {
     const fetch = vi.fn().mockResolvedValue(response(resources));
     vi.stubGlobal('fetch', fetch);
     render(<App />);
     expect(screen.getByRole('status')).toHaveTextContent('Loading');
     expect(await screen.findByText('Atlas meeting room')).toBeVisible();
     expect(screen.getByText('Portable projector kit')).toBeVisible();
-    expect(screen.getByText(/Booking opens in a later build/)).toBeVisible();
+    expect(screen.getByText(/Session-based booking/)).toBeVisible();
     expect(fetch).toHaveBeenCalledWith('/api/resources', expect.objectContaining({ signal: expect.any(AbortSignal) }));
     fireEvent.change(screen.getByRole('combobox', { name: 'Resource type' }), { target: { value: 'ROOM' } });
     expect(screen.queryByText('Portable projector kit')).not.toBeInTheDocument();

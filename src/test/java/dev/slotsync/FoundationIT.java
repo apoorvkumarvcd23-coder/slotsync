@@ -76,6 +76,8 @@ class FoundationIT {
 
     @BeforeEach
     void cleanTestBookings() {
+        jdbc.update("DELETE FROM audit_events");
+        jdbc.update("DELETE FROM idempotency_requests");
         jdbc.update("DELETE FROM bookings");
         jdbc.update("DELETE FROM users");
         jdbc.update("INSERT INTO users(id, username, password_hash, role, enabled) VALUES (?::uuid, 'test-actor', 'not-a-login-hash', 'REQUESTER', false)", ACTOR);
@@ -116,7 +118,7 @@ class FoundationIT {
         mvc.perform(get("/actuator/health/readiness")).andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("UP"))
                 .andExpect(jsonPath("$.components").doesNotExist());
-        mvc.perform(get("/actuator/env")).andExpect(status().isForbidden());
+        mvc.perform(get("/actuator/env")).andExpect(status().isUnauthorized());
     }
 
     @Test

@@ -23,9 +23,18 @@ services:
       SLOTSYNC_DB_URL: jdbc:postgresql://db:5432/slotsync
       SLOTSYNC_DB_USER: slotsync
       SPRING_CONFIG_IMPORT: configtree:/run/secrets/
+      SLOTSYNC_SEED_ENABLED: 'true'
     secrets:
       - source: postgres_password
         target: spring.datasource.password
+      - source: requester_password
+        target: slotsync.seed.requester-password
+      - source: requester2_password
+        target: slotsync.seed.requester2-password
+      - source: approver_password
+        target: slotsync.seed.approver-password
+      - source: admin_password
+        target: slotsync.seed.admin-password
     depends_on:
       db:
         condition: service_healthy
@@ -37,6 +46,14 @@ services:
       start_period: 30s
     mem_limit: 512m
 secrets:
+  requester_password:
+    file: ./.secrets/seed_requester_password
+  requester2_password:
+    file: ./.secrets/seed_requester2_password
+  approver_password:
+    file: ./.secrets/seed_approver_password
+  admin_password:
+    file: ./.secrets/seed_admin_password
   postgres_password:
     file: ./.secrets/postgres_password
 volumes:
