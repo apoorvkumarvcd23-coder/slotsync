@@ -20,6 +20,8 @@ jobs:
           node-version: '24.14.0'
           cache: npm
           cache-dependency-path: frontend/package-lock.json
+      - name: Readiness retries real socket resets and HTTP startup errors
+        run: python3 -m unittest discover -s scripts -p 'test_*.py'
       - name: PostgreSQL migrations, HTTP and race checks (Testcontainers)
         run: ./mvnw -B -ntp verify
       - name: React tests and type-checked build

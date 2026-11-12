@@ -2,9 +2,8 @@
 import argparse
 import http.cookiejar
 import json
-import time
 from pathlib import Path
-from urllib.error import URLError
+from readiness import wait_for_ready
 from urllib.parse import urlencode, urlsplit
 from urllib.request import Request, build_opener, HTTPCookieProcessor
 
@@ -22,15 +21,7 @@ opener = build_opener(HTTPCookieProcessor(http.cookiejar.CookieJar()))
 def get(path):
     with opener.open(args.base_url + path, timeout=10) as response:
         return json.load(response)
-deadline = time.monotonic() + 120
-while True:
-    try:
-        get("/actuator/health/readiness")
-        break
-    except (URLError, TimeoutError):
-        if time.monotonic() > deadline:
-            raise SystemExit("Application did not recover after restart")
-        time.sleep(1)
+wait_for_ready(opener, args.base_url + "/actuator/health/readiness")
 token = get("/api/session")
 password = json.loads((root/".secrets/demo-users.json").read_text())["admin"]
 request = Request(args.base_url + "/api/login",
