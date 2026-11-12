@@ -56,12 +56,12 @@ describe('booking workspace', () => {
   });
 
   it('shows role boundaries without requesting another users bookings', async () => {
-    const fetch = vi.fn().mockResolvedValue(ok({ ...requester, role: 'APPROVER' }));
+    const fetch = vi.fn().mockImplementation(async (url: string) => url === '/api/session' ? ok({ ...requester, role: 'APPROVER' }) : ok([]));
     vi.stubGlobal('fetch', fetch);
     render(<BookingPanel resources={resources} selectedId="" />);
-    expect(await screen.findByText(/Booking creation uses a requester account/)).toBeVisible();
+    expect(await screen.findByText('No pending requests.')).toBeVisible();
     expect(screen.queryByRole('form', { name: 'Create booking' })).not.toBeInTheDocument();
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(fetch).not.toHaveBeenCalledWith('/api/bookings', expect.anything());
   });
 
   it('rejects reversed times locally and surfaces real conflict feedback', async () => {

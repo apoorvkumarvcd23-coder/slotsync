@@ -46,10 +46,7 @@ class BookingIT {
 
     @BeforeEach
     void fixtures() {
-        jdbc.update("DELETE FROM audit_events");
-        jdbc.update("DELETE FROM idempotency_requests");
-        jdbc.update("DELETE FROM bookings");
-        jdbc.update("DELETE FROM users");
+        TestData.reset(jdbc);
         for (String name : List.of("alice", "bob", "approver", "admin")) {
             UUID id = name.equals("alice") ? ALICE : name.equals("bob") ? BOB : UUID.nameUUIDFromBytes(name.getBytes());
             String role = name.equals("admin") ? "ADMIN" : name.equals("approver") ? "APPROVER" : "REQUESTER";

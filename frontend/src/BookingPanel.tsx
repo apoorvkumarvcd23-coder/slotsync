@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Resource } from './App';
+import OperationsPanel from './OperationsPanel';
 
 type Session = { username: string | null; role: string | null; csrfToken: string; csrfHeader: string };
 type Booking = { id: string; resourceId: string; resourceName: string; startsAt: string; endsAt: string; status: string };
@@ -10,7 +11,7 @@ const initialStart = () => {
 };
 const showTime = (value: string) => new Date(value).toLocaleString('en-GB', { timeZone: 'UTC', hour12: false }) + ' UTC';
 
-export default function BookingPanel({ resources, selectedId }: { resources: Resource[]; selectedId: string }) {
+export default function BookingPanel({ resources, selectedId, onResourcesChanged = () => {} }: { resources: Resource[]; selectedId: string; onResourcesChanged?: () => void }) {
   const [session, setSession] = useState<Session | null>(null);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -100,7 +101,7 @@ export default function BookingPanel({ resources, selectedId }: { resources: Res
       const saved = await response.json() as Booking;
       setBookings(previous => [saved, ...previous.filter(booking => booking.id !== saved.id)]);
       request.current = null;
-      setNotice('Booking submitted. Pending bookings hold the slot until a decision or cancellation.');
+      setNotice(saved.status === 'APPROVED' ? 'Booking confirmed by the current policy.' : 'Booking submitted. Pending bookings hold the slot until a decision or cancellation.');
     } catch (failure) { setError((failure as Error).message); }
     finally { setBusy(false); }
   }
@@ -130,10 +131,10 @@ export default function BookingPanel({ resources, selectedId }: { resources: Res
     </form>}
     {session?.username && <>
       <div className="signed-in"><span>Signed in as <strong>{session.username}</strong> · {session.role}</span><button onClick={logout} disabled={busy}>Sign out</button></div>
-      {session.role !== 'REQUESTER' ? <p className="notice">Booking creation uses a requester account. Approver and admin screens are in the next core slice.</p> : <>
+      {session.role !== 'REQUESTER' ? <OperationsPanel key={session.username} role={session.role || ''} mutate={mutate} onResourcesChanged={onResourcesChanged} /> : <>
         <form onSubmit={book} className="booking-form" aria-label="Create booking">
           <h2>Reserve a resource</h2>
-          <p>Enter both times in UTC. New requests are pending and immediately hold the slot.</p>
+          <p>Enter both times in UTC. The current policy sets the maximum duration and whether approval is required. Pending and approved bookings hold the slot.</p>
           <label>Resource<select aria-label="Booking resource" value={resourceId} onChange={e => setResourceId(e.target.value)} required>
             <option value="">Choose a resource</option>{resources.map(resource => <option key={resource.id} value={resource.id}>{resource.name}</option>)}
           </select></label>

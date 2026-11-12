@@ -13,12 +13,15 @@ flowchart LR
 The frontend is compiled into the application JAR during the Docker build. The
 catalogue endpoint returns active resources ordered by stable code, without
 account fields. The catalogue itself is read-only. Static/catalogue/health/session
-GETs are public; requester booking writes require a session, role/ownership checks
-and CSRF. Unimplemented routes stay closed. See [the booking API guide](BOOKING_API.md).
+GETs are public, including the current policy. Requester booking writes require
+a session, role/ownership checks and CSRF. Approver/admin routes have separate
+roles and live database account checks. Unimplemented routes stay closed. See
+[the booking API guide](BOOKING_API.md) and [admin workflows](ADMIN_WORKFLOWS.md).
 
 V1 creates resource types, resources, users and bookings. No passwords are
 committed. V2 adds only synthetic campus resources. V3 adds actor-scoped
-replay responses and audit events. Optional generated demo accounts are seeded
+replay responses and audit events. V4 adds prospective policy versions, import
+batches and admin audit events without modifying V1–V3. Optional demo accounts are seeded
 with BCrypt hashes when the Docker configuration enables them. JPA
 validates its mapped schema rather than creating tables. Flyway history owns
 migration versions; never edit an applied migration once published.

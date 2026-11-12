@@ -57,9 +57,9 @@ export default function App() {
         <p className="eyebrow">CAMPUS RESOURCE CATALOGUE</p>
         <h1 id="page-title">Space for your<br /><span>next good idea.</span></h1>
         <p className="description">Find a room to bring people together, or the equipment to make it happen.</p>
-        <div className="milestone"><span className="status-dot" aria-hidden="true" />Session-based booking · Approval and admin tools in progress</div>
+        <div className="milestone"><span className="status-dot" aria-hidden="true" />Session-based booking · Approvals · Policy settings · Resource imports</div>
       </section>
-      {bookingOpen && <BookingPanel resources={resources} selectedId={selectedResource} />}
+      {bookingOpen && <BookingPanel resources={resources} selectedId={selectedResource} onResourcesChanged={() => setAttempt(value => value + 1)} />}
       <section className="catalogue" aria-labelledby="resources-title">
         <div className="catalogue-heading">
           <div><p className="eyebrow">EXPLORE THE CAMPUS</p><h2 id="resources-title">Resources <span className="count">{state === 'ready' ? visible.length : '—'}</span></h2></div>

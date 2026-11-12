@@ -1,6 +1,6 @@
 # Implemented scope and evidence
 
-This covers CORE01 and the CORE03 requester slice, not a complete release. No v0.1.0/v1.0.0
+This covers CORE01, CORE03 and CORE07 workflows, not a complete release. No v0.1.0/v1.0.0
 tag or production/scale/business-result claim is made.
 
 | Claim | Code | Executable evidence |
@@ -22,9 +22,21 @@ tag or production/scale/business-result claim is made.
 
 ## Remaining core gates
 
-- Policy configuration/snapshots, approval/rejection and bounded atomic CSV import.
-- Approver/admin UI and audit browsing.
 - Full five-case UAT, permission/browser matrix and clean-clone acceptance of that complete workflow.
 
-The implementation plan defines these upcoming slices. Requester API/session
-checks do not complete approval, policy, import or the full role-based UAT gates.
+The implementation plan defines the remaining formal UAT/release gates. The
+following CORE07 checks extend the original requester evidence:
+
+| Claim | Code | Executable evidence |
+| --- | --- | --- |
+| Prospective policy versions, strict typed bounds and stale-editor protection | V4, AdminService, BookingService.create | WorkflowIT policy snapshot/bounds/concurrent editor tests |
+| Approve/reject, no self-decision, repeat-safe audit and cancellation semantics | BookingService.decide, ApprovalController | WorkflowIT competing decisions, self-approval, rollback and slot-release tests |
+| Bounded fixed-column CSV preview with row errors | AdminService.parseCsv | Quoted/BOM/CRLF, duplicate, malformed, type, size and row-limit tests |
+| All-or-nothing apply, conflict recheck and durable replay/actor ownership | V4 import_batches, AdminService.apply | Concurrent import conflict, audit rollback, exact preview replay and wrong-admin tests |
+| Live role/enabled checks complement session roles and CSRF | AdminService.actor, BookingService.lockActor, SecurityConfiguration | Privileged-route and stale-role/disabled-account integration tests |
+| Admin/approver screens and audit use actual API/database | OperationsPanel, workflow.spec.ts | Invalid preview/apply/replay → imported resource booking → approve/cancel/reject → audit browser walkthrough |
+| App restart preserves policy/import/audit/catalogue | check_persistence.py, CI | Authenticated exact before/after comparison across app container restart |
+
+See [workflow contracts and run instructions](ADMIN_WORKFLOWS.md). Test adapters
+are not substituted for PostgreSQL; frontend unit mocks are separate from actual
+browser/API checks. No workload throughput or production/business impact is claimed.

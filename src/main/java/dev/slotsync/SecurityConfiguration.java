@@ -18,9 +18,11 @@ public class SecurityConfiguration {
         return http.authorizeHttpRequests(auth -> auth
                         .dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ERROR).permitAll()
                         .requestMatchers(HttpMethod.GET, "/", "/index.html", "/assets/**", "/favicon.svg",
-                                "/api/resources", "/api/session", "/actuator/health", "/actuator/health/**").permitAll()
+                                "/api/resources", "/api/policy", "/api/session", "/actuator/health", "/actuator/health/**").permitAll()
                         .requestMatchers("/api/login", "/api/logout").permitAll()
                         .requestMatchers("/api/bookings", "/api/bookings/**").hasRole("REQUESTER")
+                        .requestMatchers("/api/approvals", "/api/approvals/**").hasRole("APPROVER")
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().denyAll())
                 .formLogin(form -> form.loginPage("/").loginProcessingUrl("/api/login")
                         .successHandler((request, response, authentication) -> response.setStatus(204))

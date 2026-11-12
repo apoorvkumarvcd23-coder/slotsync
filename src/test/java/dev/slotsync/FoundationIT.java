@@ -76,10 +76,7 @@ class FoundationIT {
 
     @BeforeEach
     void cleanTestBookings() {
-        jdbc.update("DELETE FROM audit_events");
-        jdbc.update("DELETE FROM idempotency_requests");
-        jdbc.update("DELETE FROM bookings");
-        jdbc.update("DELETE FROM users");
+        TestData.reset(jdbc);
         jdbc.update("INSERT INTO users(id, username, password_hash, role, enabled) VALUES (?::uuid, 'test-actor', 'not-a-login-hash', 'REQUESTER', false)", ACTOR);
     }
 

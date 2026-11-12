@@ -41,11 +41,12 @@ POST `/api/bookings` requires a requester session, CSRF and an
 
 Choose future dates when running this example. Timestamps require an explicit
 offset. The service canonicalizes instants to UTC microseconds; equivalent
-timezone offsets produce the same request hash. Current fixed guards require a
-future start within 365 days, strictly ordered times and a duration up to 24
-hours. Versioned, configurable policies are the CORE07 slice.
+timezone offsets produce the same request hash. Fixed guards require a future
+start within 365 days and strictly ordered times. Duration follows the current
+versioned policy (1–1440 minutes). See [admin workflows](ADMIN_WORKFLOWS.md).
 
-New requests return 201 and PENDING, which holds the slot. Exact actor/key/payload
+New requests return 201 and PENDING or APPROVED according to their saved policy;
+both hold the slot. Exact actor/key/payload
 replays return 200 with `Idempotent-Replayed: true` and the **original response**,
 even if the booking was subsequently cancelled. GET the booking for current state.
 Changing the payload under the same actor/key returns 409 REQUEST_KEY_REUSED.

@@ -2,7 +2,7 @@
 
 Configurable room and equipment booking with transactional conflict prevention.
 
-**Status: runnable requester booking slice; configuration and approval tools are in progress.**
+**Status: runnable requester, approver and admin workflows; formal UAT and final core acceptance remain.**
 
 Java 21 / Spring Boot 3.5.16 serves a React/TypeScript resource screen from the
 same origin. Flyway creates a PostgreSQL 17 schema and three synthetic room/kit
@@ -12,9 +12,11 @@ create/list/cancel their own bookings and safely retry an unchanged request.
 Session cookies, CSRF protection, BCrypt account hashes, role/ownership checks
 and transactional audit/idempotency records are implemented.
 
-Seeded requester/approver/admin accounts are available; approver/admin booking
-writes are denied. Policy configuration, approval decisions, CSV imports and the
-full role-based UAT remain subsequent core slices.
+Seeded requester/approver/admin accounts have separate workspaces. Administrators
+edit versioned duration/approval policy, preview/apply bounded resource CSVs and
+inspect audit history. Approvers approve/reject pending requests with role and
+self-decision checks. Import replay is durable and does not duplicate resources.
+The [workflow guide](docs/ADMIN_WORKFLOWS.md) documents contracts and verification.
 
 See [the implementation plan](docs/IMPLEMENTATION_PLAN.md) for the architecture,
 task sequence and release acceptance. The core demo target is **17 November 2026**, followed by feature delivery and
@@ -49,7 +51,7 @@ docker compose down
 See [the runbook](docs/RUNBOOK.md) for checks, development, restart and failure
 diagnosis, and [the evidence ledger](docs/CLAIM_EVIDENCE.md) for implemented scope.
 The [booking API guide](docs/BOOKING_API.md) documents sessions, request keys,
-conflict responses and the current fixed validation limits.
+conflict responses and the fixed horizon/configurable duration limits.
 
 ## Checks
 
@@ -82,7 +84,7 @@ npm run test:e2e
 The browser suite needs the running Docker demo. GitHub Actions runs both the
 Testcontainers suite and the browser against the same-origin Docker application.
 
-## Intended complete core demo (not delivered yet)
+## Workflow walkthrough (formal core UAT/release audit still pending)
 
 1. Configure a campus room and its booking policy.
 2. Preview a resource CSV and inspect row-level validation errors.
@@ -90,5 +92,5 @@ Testcontainers suite and the browser against the same-origin Docker application.
 4. Approve a valid request, then cancel and rebook the slot.
 5. Inspect the audit trail and executed acceptance cases.
 
-No release tag has been earned yet. The catalogue foundation alone does not
-satisfy the complete core contract or all planned resume claims.
+No release tag has been earned yet. CORE10 formal UAT and the 17 November
+clean-clone/evidence audit remain before complete-core acceptance.

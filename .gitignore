@@ -19,3 +19,5 @@ playwright-report/
 *.db
 *.sqlite
 *.sqlite3
+__pycache__/
+*.pyc

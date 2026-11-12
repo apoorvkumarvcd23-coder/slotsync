@@ -57,10 +57,16 @@ public class BookingService {
                 throw error(400, "INVALID_INTERVAL", "Choose a future interval within one year, lasting at most 24 hours.");
             }
             lockResource(resource);
+            // A policy edit and a new booking serialize on the current-policy row.
+            long policy = jdbc.queryForObject("SELECT version_id FROM policy_current FOR SHARE", Long.class);
+            var rule = jdbc.queryForMap("SELECT * FROM policy_versions WHERE id=?", policy);
+            if (Duration.between(starts, ends).compareTo(Duration.ofMinutes(((Number) rule.get("max_duration_minutes")).longValue())) > 0)
+                throw error(400, "DURATION_EXCEEDED", "This interval exceeds the current maximum duration.");
+            String initialStatus = Boolean.TRUE.equals(rule.get("approval_required")) ? "PENDING" : "APPROVED";
             UUID id = UUID.randomUUID();
-            jdbc.update("INSERT INTO bookings(id,resource_id,owner_id,starts_at,ends_at,status) VALUES (?,?,?,?,?,'PENDING')",
-                    id, resource, actor, OffsetDateTime.ofInstant(starts, ZoneOffset.UTC), OffsetDateTime.ofInstant(ends, ZoneOffset.UTC));
-            audit(actor, id, "CREATED", null, "PENDING");
+            jdbc.update("INSERT INTO bookings(id,resource_id,owner_id,starts_at,ends_at,status,policy_version_id) VALUES (?,?,?,?,?,?,?)",
+                    id, resource, actor, OffsetDateTime.ofInstant(starts, ZoneOffset.UTC), OffsetDateTime.ofInstant(ends, ZoneOffset.UTC), initialStatus, policy);
+            audit(actor, id, "CREATED", null, initialStatus);
             BookingView result = owned(actor, id);
             try {
                 jdbc.update("INSERT INTO idempotency_requests VALUES (?,?,?,?,?)", actor, key, hash, id, json.writeValueAsString(result));
@@ -98,10 +104,38 @@ public class BookingService {
         });
     }
 
-    private void lockActor(UUID actor) {
+    public List<ApprovalView> approvals(UUID actor) {
+        return atomic(() -> {
+            lockActor(actor, "APPROVER");
+            return jdbc.query(SELECT.replace("b.*,", "b.*,u.username,") + " JOIN users u ON u.id=b.owner_id WHERE b.status='PENDING' ORDER BY b.starts_at,b.id LIMIT 100",
+                    (rs,row) -> new ApprovalView(view(rs,row),rs.getString("username"),rs.getLong("policy_version_id")));
+        });
+    }
+
+    public BookingView decide(UUID actor, UUID id, String decision) {
+        if (!List.of("APPROVED", "REJECTED").contains(decision)) throw error(400,"INVALID_DECISION","Approve or reject the booking.");
+        return atomic(() -> {
+            lockActor(actor, "APPROVER");
+            var preliminary=jdbc.queryForList("SELECT resource_id FROM bookings WHERE id=?",id);
+            if (preliminary.isEmpty()) throw error(404,"BOOKING_NOT_FOUND","Booking not found.");
+            jdbc.queryForList("SELECT id FROM resources WHERE id=? FOR UPDATE",preliminary.getFirst().get("resource_id"));
+            var row=jdbc.queryForMap("SELECT * FROM bookings WHERE id=? FOR UPDATE",id);
+            if (actor.equals(row.get("owner_id"))) throw error(403,"SELF_APPROVAL_FORBIDDEN","You cannot decide your own booking.");
+            String before=(String)row.get("status");
+            if (!before.equals(decision)) {
+                if (!before.equals("PENDING")) throw error(409,"INVALID_TRANSITION","Only pending bookings can receive a different decision.");
+                jdbc.update("UPDATE bookings SET status=? WHERE id=?",decision,id);
+                audit(actor,id,decision,before,decision);
+            }
+            return jdbc.queryForObject(SELECT+" WHERE b.id=?",BookingService::view,id);
+        });
+    }
+
+    private void lockActor(UUID actor) { lockActor(actor, "REQUESTER"); }
+    private void lockActor(UUID actor, String requiredRole) {
         var users = jdbc.queryForList("SELECT role,enabled FROM users WHERE id=? FOR UPDATE", actor);
         if (users.isEmpty() || !Boolean.TRUE.equals(users.getFirst().get("enabled"))) throw error(401, "LOGIN_REQUIRED", "Sign in again.");
-        if (!users.getFirst().get("role").equals("REQUESTER")) throw error(403, "REQUESTER_REQUIRED", "A requester account is required.");
+        if (!users.getFirst().get("role").equals(requiredRole)) throw error(403, "ACCESS_DENIED", "This role is required: " + requiredRole);
     }
 
     private void lockResource(UUID id) {
@@ -156,6 +190,7 @@ public class BookingService {
     private static final String SELECT = "SELECT b.*,r.display_name FROM bookings b JOIN resources r ON r.id=b.resource_id";
     public record BookingView(UUID id, UUID resourceId, String resourceName, Instant startsAt, Instant endsAt, String status) {}
     public record CreateResult(BookingView booking, boolean replayed) {}
+    public record ApprovalView(BookingView booking, String owner, long policyVersion) {}
     public static class BookingError extends RuntimeException {
         public final int status;
         public final String code;

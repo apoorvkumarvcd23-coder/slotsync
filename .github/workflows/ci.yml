@@ -6,7 +6,7 @@ permissions:
   contents: read
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
@@ -43,6 +43,11 @@ jobs:
           test "$status" = 503
           docker compose up --wait --wait-timeout 90
           curl --fail --silent http://127.0.0.1:8080/actuator/health/readiness
+      - name: Policy import and audit survive application restart
+        run: |
+          python3 scripts/check_persistence.py --record
+          docker compose restart app
+          python3 scripts/check_persistence.py
       - name: Demo logs
         if: failure()
         run: docker compose logs --no-color --tail 120
@@ -53,6 +58,8 @@ jobs:
           path: |
             target/failsafe-reports/
             frontend/test-results/*.png
+            frontend/test-results/workflow.json
+            target/workflow-restart.json
           retention-days: 14
       - name: Stop demo
         if: always()

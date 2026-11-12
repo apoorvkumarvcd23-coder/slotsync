@@ -14,6 +14,15 @@ capabilities; partial core slices do not automatically complete every v1 item.
 
 ## Starting point and purpose
 
+### Implemented core slices — 13 November 2026
+
+The requester workflow now extends to versioned duration/approval configuration,
+approver decisions, bounded create-only CSV preview/atomic apply/replay and admin
+audit browsing. See [workflow contracts](ADMIN_WORKFLOWS.md) and the
+[claim-to-code/check ledger](CLAIM_EVIDENCE.md). Formal CORE10 UAT and final
+17 November acceptance remain; broader December policy/mapping/recovery features
+are not counted complete. The following starting-point text is historical.
+
 No SlotSync repository or implementation was found in the connected GitHub
 account on 7 November. This is a greenfield build plan derived from the existing
 resource-booking commitments, not evidence of delivered Java or customer work.
