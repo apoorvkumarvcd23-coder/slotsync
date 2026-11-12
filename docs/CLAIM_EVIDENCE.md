@@ -3,6 +3,12 @@
 This covers CORE01, CORE03 and CORE07 workflows, not a complete release. No v0.1.0/v1.0.0
 tag or production/scale/business-result claim is made.
 
+CORE07 is verified by [clean-checkout CI](https://github.com/apoorvkumarvcd23-coder/slotsync/actions/runs/43294045428)
+at `6f735b996b1e7c7fa353034200e6fdfd8b1788cf`: 39 PostgreSQL integration tests,
+13 frontend tests, five browser scenarios, two readiness-socket regressions and
+actual app-restart persistence. [Report and screenshots](ADMIN_WORKFLOWS.md)
+identify the native PostgreSQL 18 captures separately from Linux/PostgreSQL 17 CI.
+
 | Claim | Code | Executable evidence |
 | --- | --- | --- |
 | Same-origin React catalogue reads real PostgreSQL resources | `frontend/src/App.tsx`, `resource/ResourceController.java`, `Dockerfile` | `FoundationIT.catalogueIsDeterministicAndContainsOnlyPublicFields`; `frontend/e2e/catalogue.spec.ts` |

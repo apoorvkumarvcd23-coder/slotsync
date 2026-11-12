@@ -1,0 +1,78 @@
+{
+  "date_asia_kolkata": "2026-11-13",
+  "checked_source_commit": "6f735b996b1e7c7fa353034200e6fdfd8b1788cf",
+  "native": {
+    "application_source_commit": "423a9f29d890be5664961c91175594b48ef3f8c4",
+    "source_note": "Application/frontend bytes are unchanged in 6f735b9; that follow-up fixes only the CI readiness helper and adds two real-socket regressions, which also pass natively.",
+    "environment": "Windows, Java 21.0.13, PostgreSQL 18.3, Node 24.14.0; isolated owned loopback cluster",
+    "backend_integration_tests": {
+      "passed": 39,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "frontend_unit_tests": {
+      "passed": 13
+    },
+    "typescript_and_production_build": "passed",
+    "chromium_scenarios": {
+      "passed": 5,
+      "details": {
+        "integration": "Actual same-origin React/Spring/PostgreSQL; generated local accounts; no backend/browser mocks",
+        "checks": [
+          "prospective policy save",
+          "invalid duplicate preview disables apply",
+          "two-row atomic apply",
+          "reapply creates no duplicates",
+          "imported resource booking",
+          "approve",
+          "cancel",
+          "reject",
+          "persisted audit",
+          "390px admin overflow check"
+        ],
+        "resourcesAfterImport": 5,
+        "imported": 2,
+        "status": "passed"
+      }
+    },
+    "screenshots": [
+      {
+        "path": "evidence/2026-11-13/admin-import.png",
+        "sha256": "c8058102c3788aa086e391a9dc2b014b72a212fd618cc588400f88f91e99ecae"
+      },
+      {
+        "path": "evidence/2026-11-13/admin-mobile.png",
+        "sha256": "4f64744127e346ca2c466975b869061f07ffab7b405f52b1cde3ac44d76dbd81"
+      },
+      {
+        "path": "evidence/2026-11-13/approval-queue.png",
+        "sha256": "671a24adaedfe2b80f4cc7b8a1950096489cc25fdba34aa17d6fa1084758d407"
+      },
+      {
+        "path": "evidence/2026-11-13/workflow-audit.png",
+        "sha256": "ef0b1677b119fe3f2b57c4f81d293b888100c43f9b2d0580b78886b1b8a6e6ef"
+      }
+    ],
+    "restart_claim": "Native screenshots/workflow prove actual PostgreSQL 18 UI/API, not local Docker or PostgreSQL 17; actual app restart is verified separately in Linux CI."
+  },
+  "linux_ci": {
+    "workflow_run": "https://github.com/apoorvkumarvcd23-coder/slotsync/actions/runs/43294045428",
+    "job_id": 131447475230,
+    "status": "passed",
+    "readiness_socket_regressions": 2,
+    "environment": "Clean Ubuntu 24.04 checkout, Java 21, Testcontainers PostgreSQL 17 and same-origin Docker demo",
+    "required": [
+      "39 PostgreSQL integration tests",
+      "13 frontend unit tests and production build",
+      "5 Chromium scenarios",
+      "database outage returns 503 and recovery",
+      "authenticated policy/import/audit/catalogue exact equality across app restart"
+    ]
+  },
+  "limits": [
+    "Entirely synthetic campus fixtures; no production/business/throughput result",
+    "CORE10 formal UAT and 17 November final clean-clone/claim audit remain",
+    "No release tag; richer policies, CSV mapping/updates and December hardening remain planned"
+  ]
+}

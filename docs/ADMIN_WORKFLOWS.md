@@ -1,5 +1,24 @@
 # Configuration, approvals and resource imports (CORE07)
 
+## Verified 13 November 2026 IST
+
+[Clean-checkout CI](https://github.com/apoorvkumarvcd23-coder/slotsync/actions/runs/43294045428)
+passed at source `6f735b996b1e7c7fa353034200e6fdfd8b1788cf`: 39 PostgreSQL 17
+integration tests, 13 frontend tests, production build, five Chromium scenarios,
+two real-socket readiness regressions, database outage/recovery and exact
+policy/import/audit/catalogue equality across an app-container restart.
+
+The [recorded report](workflow-2026-11-13.json) separates that Linux/Docker proof
+from actual native Windows/PostgreSQL 18 browser screenshots:
+
+- [Admin import/replay](evidence/2026-11-13/admin-import.png)
+- [390px admin layout](evidence/2026-11-13/admin-mobile.png)
+- [Approver queue](evidence/2026-11-13/approval-queue.png)
+- [Persisted workflow audit](evidence/2026-11-13/workflow-audit.png)
+
+All data is synthetic. These images are actual browser captures, not mockups.
+Formal UAT and final core acceptance remain; no release tag is claimed.
+
 Run the [README quick start](../README.md), then open **My bookings / Sign in**.
 Read generated demo credentials locally from ignored .secrets/demo-users.json.
 Use admin for settings/imports/audit, approver for decisions, and requester or
@@ -97,6 +116,14 @@ or import audit failure rolls back its business writes. The browser clears an
 old preview when CSV text changes so it cannot apply an unseen edit.
 
 ## Audit and restart proof
+
+The readiness helper retries transient TCP resets, closed HTTP connections and
+HTTP startup failures until a bounded deadline. Two actual loopback-socket tests
+exercise reset → 503 → UP recovery and an always-unready timeout:
+
+```sh
+python -m unittest discover -s scripts -p 'test_*.py'
+```
 
 GET /api/admin/audit shows up to 200 latest booking, decision, policy and import
 events, with actor, entity, UTC time and transition/details. This is a local demo
