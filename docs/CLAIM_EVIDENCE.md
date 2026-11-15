@@ -28,7 +28,13 @@ identify the native PostgreSQL 18 captures separately from Linux/PostgreSQL 17 C
 
 ## Remaining core gates
 
-- Full five-case UAT, permission/browser matrix and clean-clone acceptance of that complete workflow.
+- Final four-project clean-clone acceptance and claim audit on 17 November.
+
+The [five-case UAT pack](CORE_UAT.md) adds policy/import/concurrent booking/
+decision/audit scenarios in `frontend/e2e/uat.spec.ts`, with independent role
+sessions and exact reconciliation. CI runs the pack and
+`check_uat_persistence.py` across an actual app container restart. A successful
+source run/report is required to claim recorded verification of these checks.
 
 The implementation plan defines the remaining formal UAT/release gates. The
 following CORE07 checks extend the original requester evidence:

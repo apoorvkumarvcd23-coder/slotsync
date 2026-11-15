@@ -153,7 +153,7 @@ Native Windows verification uses an isolated PostgreSQL 18 cluster; PostgreSQL
 
 ## Remaining release gates
 
-CORE10 still executes the formal five-case UAT/repair pack; final clean-clone
+CORE10 adds the [formal five-case UAT/repair pack](CORE_UAT.md); final clean-clone
 claim audit is 17 November. No core release tag is earned merely by implementing
 CORE07. Rich policy types/opening hours, CSV column mapping/updates, pagination,
 retention, quotas, load measurements and December v1 hardening remain planned.
