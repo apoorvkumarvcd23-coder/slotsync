@@ -47,3 +47,31 @@ captures are labelled separately. Permanent recorded results are added only
 after their source CI succeeds. Five synthetic UAT cases establish this bounded
 workflow, not throughput, production security or the December v1 feature gates.
 Final four-project core/claim audit remains 17 November; no release tag yet.
+
+## Recorded results — 16 November 2026 IST
+
+All five cases passed on native Windows/PostgreSQL 18 and the
+[clean Linux/PostgreSQL 17 source CI](https://github.com/apoorvkumarvcd23-coder/slotsync/actions/runs/43752832581)
+at `e3c7cf53ad07fb109066033bb884eb24332c0b99`. CI also passed 39 PostgreSQL
+integration tests, 13 frontend tests, two socket readiness regressions, the five
+existing browser scenarios, production build and database outage/recovery.
+It actually restarted the app container and verified all eight exact role-state/
+replay checks. Native verification did not separately restart the app today.
+
+The [permanent report](core-uat-2026-11-16.json) records both actual UAT reports,
+the CI restart result, screenshot hashes and the verified
+[artifact](https://github.com/apoorvkumarvcd23-coder/slotsync/actions/runs/43752832581/artifacts/14176674944)
+ZIP hash. The six published images below are inspected Linux CI captures:
+
+| View | Screenshot |
+| --- | --- |
+| Prospective policy v4 | [Policy](evidence/2026-11-16/uat-policy.png) |
+| Applied two-row import/replay | [Import](evidence/2026-11-16/uat-import.png), [390px mobile](evidence/2026-11-16/uat-mobile.png) |
+| Winning pending booking from actual competing submissions | [Booking](evidence/2026-11-16/uat-race.png) |
+| Approver sees original and new policy snapshots | [Approval](evidence/2026-11-16/uat-approval.png) |
+| Restored policy and reconciled transitions | [Audit](evidence/2026-11-16/uat-audit.png) |
+
+The UAT runner now uses a separate automatic output directory so starting it
+preserves the preceding baseline browser screenshots/JSON. The source run above
+proved both packs but its artifact retained only UAT images; subsequent CI checks
+the retention fix. The actual UAT behaviors and assertions are unchanged.

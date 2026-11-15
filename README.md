@@ -2,7 +2,7 @@
 
 Configurable room and equipment booking with transactional conflict prevention.
 
-**Status: runnable requester, approver and admin workflows; formal UAT and final core acceptance remain.**
+**Status: runnable requester, approver and admin workflows; five-case UAT verified. Final core acceptance remains 17 November.**
 
 Java 21 / Spring Boot 3.5.16 serves a React/TypeScript resource screen from the
 same origin. Flyway creates a PostgreSQL 17 schema and three synthetic room/kit
@@ -17,6 +17,8 @@ edit versioned duration/approval policy, preview/apply bounded resource CSVs and
 inspect audit history. Approvers approve/reject pending requests with role and
 self-decision checks. Import replay is durable and does not duplicate resources.
 The [workflow guide](docs/ADMIN_WORKFLOWS.md) documents contracts and verification.
+The [formal UAT runbook and recorded results](docs/CORE_UAT.md) cover policy,
+imports, competing bookings, decisions, exact audit and real app-restart replay.
 
 See [the implementation plan](docs/IMPLEMENTATION_PLAN.md) for the architecture,
 task sequence and release acceptance. The core demo target is **17 November 2026**, followed by feature delivery and

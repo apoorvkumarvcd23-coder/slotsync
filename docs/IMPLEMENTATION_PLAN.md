@@ -19,8 +19,8 @@ capabilities; partial core slices do not automatically complete every v1 item.
 The requester workflow now extends to versioned duration/approval configuration,
 approver decisions, bounded create-only CSV preview/atomic apply/replay and admin
 audit browsing. See [workflow contracts](ADMIN_WORKFLOWS.md) and the
-[claim-to-code/check ledger](CLAIM_EVIDENCE.md). Formal CORE10 UAT and final
-17 November acceptance remain; broader December policy/mapping/recovery features
+[claim-to-code/check ledger](CLAIM_EVIDENCE.md). [Formal CORE10 UAT](CORE_UAT.md)
+is verified on 16 November; final 17 November acceptance remains. Broader December policy/mapping/recovery features
 are not counted complete. The following starting-point text is historical.
 
 No SlotSync repository or implementation was found in the connected GitHub

@@ -1,0 +1,331 @@
+{
+  "recorded_date_ist": "2026-11-16",
+  "scope": "CORE10 five-case synthetic UAT; final core release audit remains 17 November",
+  "verified_source": "e3c7cf53ad07fb109066033bb884eb24332c0b99",
+  "ci": {
+    "url": "https://github.com/apoorvkumarvcd23-coder/slotsync/actions/runs/43752832581",
+    "artifact_id": 14176674944,
+    "artifact_zip_sha256": "59f1b80010e81fa047a56ecb8ba744b61e1ee60e482ad0d900d4048c6bceb864",
+    "platform": "Linux / Java21 / real PostgreSQL17 Testcontainers and Docker Compose",
+    "checks": {
+      "postgres_integration": 39,
+      "frontend_unit": 13,
+      "readiness_socket": 2,
+      "baseline_browser_scenarios": 5,
+      "formal_uat_cases": 5,
+      "production_build": "passed",
+      "actual_database_outage_recovery": "passed"
+    },
+    "uat": {
+      "status": "passed",
+      "recordedAt": "2026-11-15T19:33:52.355Z",
+      "integration": "Actual React/Spring/PostgreSQL and separate generated-account cookie sessions; no service/browser mocks",
+      "cases": [
+        {
+          "id": "UAT01",
+          "status": "passed",
+          "observed": {
+            "previousVersion": 3,
+            "newVersion": 4,
+            "oldBookingVersion": 3,
+            "oldBookingUnchanged": "be57c727-a1b3-45e9-9970-f88eafb3c699",
+            "staleEditorHttp": 409,
+            "durationHttp": 400,
+            "unchangedSaveVersion": 4,
+            "originalResponseReplayAfterPolicyChange": true
+          }
+        },
+        {
+          "id": "UAT02",
+          "status": "passed",
+          "observed": {
+            "input": 2,
+            "rejectedInvalidBatch": 1,
+            "invalidBatchNoResourceWrites": true,
+            "validBatchId": "c9d3a809-5f20-4207-9789-56717dfca4d0",
+            "inserted": 2,
+            "replayCreatesNoDuplicates": true,
+            "resourceCountBefore": 5,
+            "resourceCountAfter": 7,
+            "mobileOverflow": false
+          }
+        },
+        {
+          "id": "UAT03",
+          "status": "passed",
+          "observed": {
+            "concurrentHttp": [
+              201,
+              409
+            ],
+            "winnerId": "828121ff-8af7-4dce-a0bb-1f0dc359c027",
+            "winnerActor": "requester",
+            "sameKeyReplay": 200,
+            "changedPayload": 409,
+            "adjacentHttp": 201,
+            "oneActiveOverlap": true
+          }
+        },
+        {
+          "id": "UAT04",
+          "status": "passed",
+          "observed": {
+            "foreignRead": 404,
+            "foreignCancel": 404,
+            "wrongRoleApproval": 403,
+            "wrongRoleAudit": 403,
+            "approved": "828121ff-8af7-4dce-a0bb-1f0dc359c027",
+            "repeatedApprovalCreatesNoTransition": true,
+            "rejected": "7cd510b1-7dac-4417-bc22-d186ed6d817d",
+            "slotReusableAfterCancelAndReject": true,
+            "finalCancelled": "ca299d54-6099-49e9-a351-646857937e94"
+          }
+        },
+        {
+          "id": "UAT05",
+          "status": "passed",
+          "observed": {
+            "bookingEvents": 11,
+            "bookingIds": [
+              "be57c727-a1b3-45e9-9970-f88eafb3c699",
+              "828121ff-8af7-4dce-a0bb-1f0dc359c027",
+              "b99816ca-08c3-4ecf-bc77-977aaec7d108",
+              "7cd510b1-7dac-4417-bc22-d186ed6d817d",
+              "ca299d54-6099-49e9-a351-646857937e94"
+            ],
+            "invalidImportEvents": 0,
+            "successfulImportEvents": 1,
+            "changedPolicyEvents": 2,
+            "replayAddsNoAudit": true,
+            "restoredPolicy": {
+              "version": 5,
+              "maxDurationMinutes": 1440,
+              "approvalRequired": true
+            },
+            "auditIds": [
+              "123df6e5-0d49-4a22-bad3-c4d8d8e189cb",
+              "177a3fd9-270d-4705-8d74-7bf98906bfdd",
+              "30bf94c3-1866-46ad-9da5-79827c4ce081",
+              "4234dab1-4149-4bb9-aad2-3b023121007f",
+              "602ba170-01ea-40fb-9d29-3d8b487bd0f3",
+              "721ed56c-7edb-4c4b-8ae0-4014609e652e",
+              "8614182e-c9b8-48bf-9eae-49803cdb5ab9",
+              "a8666736-8f89-4bf4-acb8-5082b372dd14",
+              "afae5f9d-bd7b-4c5d-ac97-1519ca44b940",
+              "da1e5fbc-11c9-4843-84bb-c90ca57f3661",
+              "e37f16c8-802f-4816-b276-795a05324ca9",
+              "f7539a14-09ed-44f5-b01d-6e2223777dd3"
+            ]
+          }
+        }
+      ],
+      "replayAfterRestart": {
+        "actor": "requester",
+        "key": "046f2108-1176-4547-9b92-d62ce934059c",
+        "payload": {
+          "resourceId": "20e84dcd-9c8c-480a-9110-81bdba851864",
+          "startsAt": "2026-12-15T10:00:00.000Z",
+          "endsAt": "2026-12-15T11:00:00.000Z"
+        },
+        "originalResponse": {
+          "id": "828121ff-8af7-4dce-a0bb-1f0dc359c027",
+          "resourceId": "20e84dcd-9c8c-480a-9110-81bdba851864",
+          "resourceName": "UAT studio 2B2AE2B5",
+          "startsAt": "2026-12-15T10:00:00Z",
+          "endsAt": "2026-12-15T11:00:00Z",
+          "status": "PENDING"
+        }
+      },
+      "resourceCodes": [
+        "ROOM-UAT10-2B2AE2B5",
+        "KIT-UAT10-2B2AE2B5"
+      ],
+      "images": [
+        "uat-policy.png",
+        "uat-import.png",
+        "uat-mobile.png",
+        "uat-race.png",
+        "uat-approval.png",
+        "uat-audit.png"
+      ],
+      "limits": "Five synthetic core UAT cases; app-process restart is checked separately. No production scale or full December acceptance claim."
+    },
+    "actual_app_process_restart": {
+      "status": "passed",
+      "integration": "Actual fresh authenticated role sessions and HTTP reads; invoker stops/starts the app process with the same database",
+      "checks": [
+        "exact policy",
+        "exact import batches",
+        "exact audit IDs/details",
+        "exact catalogue",
+        "exact two requester booking lists",
+        "exact approver queue",
+        "original actor-key response replay",
+        "replay adds no audit"
+      ],
+      "formal_cases": 5,
+      "resource_count": 7,
+      "audit_count": 30,
+      "replayed_booking_id": "828121ff-8af7-4dce-a0bb-1f0dc359c027",
+      "limits": "Synthetic owned setup. Lifecycle stop/start must actually be executed by the invoker; this helper alone does not stop a process."
+    }
+  },
+  "native": {
+    "platform": "Windows / Java21 / real PostgreSQL18, not Docker",
+    "checks": {
+      "postgres_integration": 39,
+      "frontend_unit": 13,
+      "readiness_socket": 2,
+      "baseline_browser_scenarios": 5,
+      "formal_uat_cases": 5,
+      "production_build": "passed"
+    },
+    "uat": {
+      "status": "passed",
+      "recordedAt": "2026-11-15T19:24:24.467Z",
+      "integration": "Actual React/Spring/PostgreSQL and separate generated-account cookie sessions; no service/browser mocks",
+      "cases": [
+        {
+          "id": "UAT01",
+          "status": "passed",
+          "observed": {
+            "previousVersion": 3,
+            "newVersion": 4,
+            "oldBookingVersion": 3,
+            "oldBookingUnchanged": "32edcb4f-f4e2-4424-b53d-ee5279f75fb9",
+            "staleEditorHttp": 409,
+            "durationHttp": 400,
+            "unchangedSaveVersion": 4,
+            "originalResponseReplayAfterPolicyChange": true
+          }
+        },
+        {
+          "id": "UAT02",
+          "status": "passed",
+          "observed": {
+            "input": 2,
+            "rejectedInvalidBatch": 1,
+            "invalidBatchNoResourceWrites": true,
+            "validBatchId": "f0958b2f-c4e2-4553-be66-1539cdf59157",
+            "inserted": 2,
+            "replayCreatesNoDuplicates": true,
+            "resourceCountBefore": 5,
+            "resourceCountAfter": 7,
+            "mobileOverflow": false
+          }
+        },
+        {
+          "id": "UAT03",
+          "status": "passed",
+          "observed": {
+            "concurrentHttp": [
+              201,
+              409
+            ],
+            "winnerId": "3af1e96c-1a05-4645-a350-babe034529e0",
+            "winnerActor": "requester",
+            "sameKeyReplay": 200,
+            "changedPayload": 409,
+            "adjacentHttp": 201,
+            "oneActiveOverlap": true
+          }
+        },
+        {
+          "id": "UAT04",
+          "status": "passed",
+          "observed": {
+            "foreignRead": 404,
+            "foreignCancel": 404,
+            "wrongRoleApproval": 403,
+            "wrongRoleAudit": 403,
+            "approved": "3af1e96c-1a05-4645-a350-babe034529e0",
+            "repeatedApprovalCreatesNoTransition": true,
+            "rejected": "8e989392-b8a9-4299-a00a-5deffb92e898",
+            "slotReusableAfterCancelAndReject": true,
+            "finalCancelled": "3139c6b7-79af-49e7-b801-e28487f69e4f"
+          }
+        },
+        {
+          "id": "UAT05",
+          "status": "passed",
+          "observed": {
+            "bookingEvents": 11,
+            "bookingIds": [
+              "32edcb4f-f4e2-4424-b53d-ee5279f75fb9",
+              "3af1e96c-1a05-4645-a350-babe034529e0",
+              "c9e92170-27ee-4739-95b2-c427237005cf",
+              "8e989392-b8a9-4299-a00a-5deffb92e898",
+              "3139c6b7-79af-49e7-b801-e28487f69e4f"
+            ],
+            "invalidImportEvents": 0,
+            "successfulImportEvents": 1,
+            "changedPolicyEvents": 2,
+            "replayAddsNoAudit": true,
+            "restoredPolicy": {
+              "version": 5,
+              "maxDurationMinutes": 1440,
+              "approvalRequired": true
+            },
+            "auditIds": [
+              "04a8f14f-fa55-435c-ab4a-383bfef83b98",
+              "0ccc591e-82a4-44be-99fd-2b8dda61d3f5",
+              "1beefebc-f35c-4d1d-8f32-2d39a0046e18",
+              "29d010b4-6629-4ac7-912d-249825e22971",
+              "46553abb-d6ab-403d-9a7e-c725d76cf240",
+              "5986f0e8-6fd9-4a24-898a-ef2f7f4e13f8",
+              "5ba2705c-24c1-497b-91e2-4bb8712d4a8e",
+              "6c5ffe5e-48d5-46e1-96ba-c5da60e51043",
+              "7dd4485e-a284-4c39-b16b-b19d04f6c8fc",
+              "cb3507d1-a984-4930-a153-9dbe52b88963",
+              "cfe361cf-f2ce-4d9f-873b-c4e4e1c9fc3c",
+              "ed98e16d-8f46-4f77-b0a0-1a5af1931272"
+            ]
+          }
+        }
+      ],
+      "replayAfterRestart": {
+        "actor": "requester",
+        "key": "19e0e9f8-9d6e-49f1-83bb-f3f874e211d9",
+        "payload": {
+          "resourceId": "5a404211-3d90-4c1a-9d6b-e93f049227b1",
+          "startsAt": "2026-12-15T10:00:00.000Z",
+          "endsAt": "2026-12-15T11:00:00.000Z"
+        },
+        "originalResponse": {
+          "id": "3af1e96c-1a05-4645-a350-babe034529e0",
+          "resourceId": "5a404211-3d90-4c1a-9d6b-e93f049227b1",
+          "resourceName": "UAT studio 0407A3CD",
+          "startsAt": "2026-12-15T10:00:00Z",
+          "endsAt": "2026-12-15T11:00:00Z",
+          "status": "PENDING"
+        }
+      },
+      "resourceCodes": [
+        "ROOM-UAT10-0407A3CD",
+        "KIT-UAT10-0407A3CD"
+      ],
+      "images": [
+        "uat-policy.png",
+        "uat-import.png",
+        "uat-mobile.png",
+        "uat-race.png",
+        "uat-approval.png",
+        "uat-audit.png"
+      ],
+      "limits": "Five synthetic core UAT cases; app-process restart is checked separately. No production scale or full December acceptance claim."
+    },
+    "app_process_restart": "Not separately executed natively today; real container restart is proved by CI"
+  },
+  "published_screenshots": {
+    "origin": "Successful Linux CI artifact, visually inspected",
+    "sha256": {
+      "uat-policy.png": "e528f89b39a6c2bf5ed722a8e41ed21762d8c1187d8a9deb79dbf278618674c2",
+      "uat-import.png": "4c6542bcfa9916c487eddf92297677c2a74117d9f2e8bc2bfbed170a3a04eca9",
+      "uat-mobile.png": "0ce771dfc0a13b4285d01453f704d6aea396f573292402d3fc03a56738157e07",
+      "uat-race.png": "e8a44c36421110bd09ac83af304bc89248bd5af13459caa01e77939c7eeffa04",
+      "uat-approval.png": "ab1d567e6e3326290631357283bcc75cda13918c19c4ab3c72682a86691baf96",
+      "uat-audit.png": "27dda1d40dffda38acfa125bf0a4e050b8f9fb0ed1c66804b3baba3fdf67089e"
+    }
+  },
+  "limits": "Synthetic demo fixtures and role sessions only; no production/load/business-impact claim, held-out evaluation or release tag. The follow-up UAT output-directory fix preserves preceding browser artifacts without changing scenario behavior."
+}

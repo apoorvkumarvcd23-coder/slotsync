@@ -35,6 +35,10 @@ decision/audit scenarios in `frontend/e2e/uat.spec.ts`, with independent role
 sessions and exact reconciliation. CI runs the pack and
 `check_uat_persistence.py` across an actual app container restart. A successful
 source run/report is required to claim recorded verification of these checks.
+Recorded 16 November: [permanent five-case results and actual CI app restart](core-uat-2026-11-16.json)
+passed at source `e3c7cf53ad07fb109066033bb884eb24332c0b99`;
+[CI and inspected screenshots](CORE_UAT.md) distinguish native PostgreSQL 18
+from Linux/PostgreSQL 17. Final clean-clone/claim audit and release remain open.
 
 The implementation plan defines the remaining formal UAT/release gates. The
 following CORE07 checks extend the original requester evidence:
