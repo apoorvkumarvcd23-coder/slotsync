@@ -14,6 +14,13 @@ capabilities; partial core slices do not automatically complete every v1 item.
 
 ## Starting point and purpose
 
+### Core acceptance — 17 November 2026
+
+The [bounded core acceptance/claim ledger](CORE_ACCEPTANCE.md) records the clean
+clone, real PostgreSQL/browser/UAT evidence and precise remaining December scope.
+Only a reviewed acceptance commit whose full CI passes may receive v0.1.0.
+The earlier dated slices below remain historical; they do not imply full v1.0.0.
+
 ### Implemented core slices — 13 November 2026
 
 The requester workflow now extends to versioned duration/approval configuration,

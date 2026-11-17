@@ -1,0 +1,173 @@
+{
+  "audit_date_asia_kolkata": "2026-11-17",
+  "project": "SlotSync",
+  "core_scope": "v0.1.0 bounded core only; December v1.0.0 gates excluded",
+  "audited_input_sha": "34cd7cc97f89dc8d5b3729edd9dadf5907504295",
+  "clean_clone": true,
+  "previous_verified_ci": "https://github.com/apoorvkumarvcd23-coder/slotsync/actions/runs/43753629314",
+  "release_gate": "Tag only the reviewed default-branch acceptance commit after its own complete clean-checkout CI passes; the immutable tag/CI ledger is published in the profile repository.",
+  "criteria": [
+    {
+      "contract": "Requester catalogue and UTC book/cancel UI",
+      "implementation": "frontend/src/BookingPanel.tsx; resource/ResourceController.java; booking/BookingService.java",
+      "verification": "booking.spec.ts; catalogue.spec.ts; BookingIT"
+    },
+    {
+      "contract": "Real overlap, adjacency and actor-key replay",
+      "implementation": "V1 GiST exclusion constraint; V3 idempotency records; BookingService.atomic/create",
+      "verification": "39 PostgreSQL integration tests; concurrent browser 201/409; changed payload 409 and exact replay 200"
+    },
+    {
+      "contract": "Prospective maximum-duration/approval settings",
+      "implementation": "booking/AdminService.java; OperationsPanel.tsx; V4 policy versions",
+      "verification": "WorkflowIT; UAT01 snapshot/stale/unchanged policy checks"
+    },
+    {
+      "contract": "Approver role, decisions, cancellation and audit",
+      "implementation": "booking/ApprovalController.java; BookingService.decide/cancel",
+      "verification": "WorkflowIT role/self-decision/rollback checks; UAT04/05 exact transitions"
+    },
+    {
+      "contract": "Bounded atomic fixed-column CSV imports",
+      "implementation": "booking/AdminService.java preview/parseCsv/apply; V4 import batches",
+      "verification": "CSV bounds/quotes/conflict/replay regressions; UAT02; invalid batch has no writes"
+    },
+    {
+      "contract": "Complete UAT and durable app restart",
+      "implementation": "frontend/e2e/uat.spec.ts; scripts/check_uat_persistence.py",
+      "verification": "Five formal cases; exact four-role views/original-response replay across real CI app-container restart"
+    }
+  ],
+  "native_current_run": {
+    "platform": "Windows / real PostgreSQL18 / Java21; not Docker",
+    "checks": {
+      "postgres_integration": 39,
+      "frontend": 13,
+      "readiness": 2,
+      "baseline_browser": 5,
+      "formal_uat_cases": 5
+    },
+    "uat_cases": [
+      {
+        "id": "UAT01",
+        "status": "passed",
+        "observed": {
+          "previousVersion": 3,
+          "newVersion": 4,
+          "oldBookingVersion": 3,
+          "oldBookingUnchanged": "45260fbc-b496-4d13-87d3-91a3dbf61ac8",
+          "staleEditorHttp": 409,
+          "durationHttp": 400,
+          "unchangedSaveVersion": 4,
+          "originalResponseReplayAfterPolicyChange": true
+        }
+      },
+      {
+        "id": "UAT02",
+        "status": "passed",
+        "observed": {
+          "input": 2,
+          "rejectedInvalidBatch": 1,
+          "invalidBatchNoResourceWrites": true,
+          "validBatchId": "2e58d2ad-20a3-44ed-b9d5-2b63751b95cd",
+          "inserted": 2,
+          "replayCreatesNoDuplicates": true,
+          "resourceCountBefore": 5,
+          "resourceCountAfter": 7,
+          "mobileOverflow": false
+        }
+      },
+      {
+        "id": "UAT03",
+        "status": "passed",
+        "observed": {
+          "concurrentHttp": [
+            201,
+            409
+          ],
+          "winnerId": "3f83b481-92c6-4af0-9144-7d8602ac4d7b",
+          "winnerActor": "requester",
+          "sameKeyReplay": 200,
+          "changedPayload": 409,
+          "adjacentHttp": 201,
+          "oneActiveOverlap": true
+        }
+      },
+      {
+        "id": "UAT04",
+        "status": "passed",
+        "observed": {
+          "foreignRead": 404,
+          "foreignCancel": 404,
+          "wrongRoleApproval": 403,
+          "wrongRoleAudit": 403,
+          "approved": "3f83b481-92c6-4af0-9144-7d8602ac4d7b",
+          "repeatedApprovalCreatesNoTransition": true,
+          "rejected": "b32805e7-cebd-426d-b7a0-6b5f54e63f6a",
+          "slotReusableAfterCancelAndReject": true,
+          "finalCancelled": "34ab295c-b7ef-489e-b5af-fc855c190afc"
+        }
+      },
+      {
+        "id": "UAT05",
+        "status": "passed",
+        "observed": {
+          "bookingEvents": 11,
+          "bookingIds": [
+            "45260fbc-b496-4d13-87d3-91a3dbf61ac8",
+            "3f83b481-92c6-4af0-9144-7d8602ac4d7b",
+            "5dad818a-c8be-4674-bd85-3a13bbfe5f72",
+            "b32805e7-cebd-426d-b7a0-6b5f54e63f6a",
+            "34ab295c-b7ef-489e-b5af-fc855c190afc"
+          ],
+          "invalidImportEvents": 0,
+          "successfulImportEvents": 1,
+          "changedPolicyEvents": 2,
+          "replayAddsNoAudit": true,
+          "restoredPolicy": {
+            "version": 5,
+            "maxDurationMinutes": 1440,
+            "approvalRequired": true
+          },
+          "auditIds": [
+            "06693005-6550-40b2-8d81-47ab783bfee7",
+            "0ed9f661-7f31-4a68-bbad-bcf482eb48db",
+            "179582a4-8b2f-4f4e-bbf0-5ba68e9ce52c",
+            "209ac607-aa48-4f76-8aed-de312f2ce52e",
+            "2745ae75-6655-4fdc-bf65-e806a79490a1",
+            "2c2a6375-0542-4727-9456-62f3acad3a36",
+            "3526d59f-346b-44a4-bb10-65e6e68589f4",
+            "528120a3-f920-4012-b9d5-34971d998595",
+            "618ad107-8f1c-4712-b902-fd2e5d3065b7",
+            "8354f73a-8de9-4fe1-9556-95a178598f65",
+            "9cf30b38-fd32-4cd0-bf66-7e401fe98c0a",
+            "ec85b5e8-2c13-43d9-947e-66331e0318ed"
+          ]
+        }
+      }
+    ],
+    "restart": "Real app-container restart and original-response replay are independently proved in linked Linux CI; not repeated natively in this audit."
+  },
+  "prior_evidence_sha256": {
+    "core-uat-2026-11-16.json": "3a1540323eaf74dba3a49136ee5fbe11b5a4252475d8be2b4ac9035b4cd92037"
+  },
+  "published_screenshot": {
+    "path": "evidence/2026-11-17/core-acceptance.png",
+    "sha256": "7f0526cb683fad1f7ccd17d7fff00ab77bae3f2ccb5c2c582742d21fb4b47518",
+    "origin": "Actual native Windows acceptance run; visually reviewed before publication"
+  },
+  "tracked_file_boundary_review": {
+    "forbidden_local_files_tracked": 0,
+    "known_credential_patterns": 0,
+    "limits": "Targeted current-file checks, not a claim of comprehensive security review."
+  },
+  "allowed_project_wording": [
+    "Implemented a Java/Spring/React room and equipment booking workflow with PostgreSQL overlap protection, actor-scoped replay and role-based approval.",
+    "Added prospective policy settings, atomic resource CSV preview/apply/replay and audit; verified five synthetic UAT cases and application-restart persistence."
+  ],
+  "remaining_limits": [
+    "Local HTTP demo with generated accounts, not a public production deployment.",
+    "Fixed CSV columns/create-only imports; richer mapping/updates and opening-hour rules remain December work.",
+    "Pagination, retention, load measurements and full December v1 hardening remain open."
+  ]
+}

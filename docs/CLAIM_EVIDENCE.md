@@ -1,7 +1,9 @@
 # Implemented scope and evidence
 
-This covers CORE01, CORE03 and CORE07 workflows, not a complete release. No v0.1.0/v1.0.0
-tag or production/scale/business-result claim is made.
+The [17 November core acceptance audit](CORE_ACCEPTANCE.md) covers the complete
+bounded v0.1.0 workflow, including CORE10 UAT. The slice reports below retain
+their original source/platform labels. Full December v1.0.0, production scale
+and business-result claims are outside this acceptance.
 
 CORE07 is verified by [clean-checkout CI](https://github.com/apoorvkumarvcd23-coder/slotsync/actions/runs/43294045428)
 at `6f735b996b1e7c7fa353034200e6fdfd8b1788cf`: 39 PostgreSQL integration tests,
@@ -28,7 +30,8 @@ identify the native PostgreSQL 18 captures separately from Linux/PostgreSQL 17 C
 
 ## Remaining core gates
 
-- Final four-project clean-clone acceptance and claim audit on 17 November.
+- The bounded core is audited in [CORE_ACCEPTANCE.md](CORE_ACCEPTANCE.md).
+  A core tag still requires passing CI of its reviewed acceptance commit.
 
 The [five-case UAT pack](CORE_UAT.md) adds policy/import/concurrent booking/
 decision/audit scenarios in `frontend/e2e/uat.spec.ts`, with independent role

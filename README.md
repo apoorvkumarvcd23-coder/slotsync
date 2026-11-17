@@ -2,7 +2,9 @@
 
 Configurable room and equipment booking with transactional conflict prevention.
 
-**Status: runnable requester, approver and admin workflows; five-case UAT verified. Final core acceptance remains 17 November.**
+**Status: bounded core audited on 17 November 2026.** Requester, approver and admin
+workflows and five-case UAT pass. See the [core acceptance/claim ledger](docs/CORE_ACCEPTANCE.md)
+for clean-clone evidence and the CI gate required before the v0.1.0 tag.
 
 Java 21 / Spring Boot 3.5.16 serves a React/TypeScript resource screen from the
 same origin. Flyway creates a PostgreSQL 17 schema and three synthetic room/kit
@@ -86,7 +88,7 @@ npm run test:e2e
 The browser suite needs the running Docker demo. GitHub Actions runs both the
 Testcontainers suite and the browser against the same-origin Docker application.
 
-## Workflow walkthrough (formal core UAT/release audit still pending)
+## Verified core workflow
 
 1. Configure a campus room and its booking policy.
 2. Preview a resource CSV and inspect row-level validation errors.
@@ -94,5 +96,6 @@ Testcontainers suite and the browser against the same-origin Docker application.
 4. Approve a valid request, then cancel and rebook the slot.
 5. Inspect the audit trail and executed acceptance cases.
 
-No release tag has been earned yet. CORE10 formal UAT and the 17 November
-clean-clone/evidence audit remain before complete-core acceptance.
+The 17 November [core audit](docs/CORE_ACCEPTANCE.md) maps the complete bounded
+workflow to actual code, tests and evidence. v0.1.0 is the core milestone;
+December's richer policy/import rules and full v1.0.0 hardening remain separate.
