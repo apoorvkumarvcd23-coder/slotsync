@@ -15,9 +15,15 @@ test('admin policy/import → requester booking → approver decision → audit 
   await signIn(page, 'admin');
   const adminWorkspace = page.getByRole('region', { name: 'Administration workspace' });
   await expect(page.getByRole('heading', { name: 'Administration', exact: true })).toBeVisible();
+  await expect(page.getByLabel('Maximum duration (minutes)')).toBeEnabled();
   await page.getByLabel('Maximum duration (minutes)').fill('120');
   await page.getByLabel('Require approval', { exact: true }).check();
+  const policyResponse = page.waitForResponse(response => response.url().endsWith('/api/admin/policy') && response.request().method() === 'POST');
   await page.getByRole('button', { name: 'Save policy' }).click();
+  const savedPolicy = await (await policyResponse).json();
+  expect(savedPolicy.maxDurationMinutes).toBe(120);
+  expect(savedPolicy.approvalRequired).toBe(true);
+  expect(savedPolicy.version).toBeGreaterThan(1);
   await expect(page.getByRole('status')).toContainText('saved. Existing bookings keep');
   await page.getByLabel('Resource CSV', { exact: true }).fill(header + 'ROOM-CORE07,Cedar studio,ROOM,Demo east wing,12\nROOM-CORE07,Duplicate,ROOM,Demo east wing,12');
   await page.getByRole('button', { name: 'Preview CSV' }).click();

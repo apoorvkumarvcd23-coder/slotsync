@@ -55,6 +55,7 @@ following CORE07 checks extend the original requester evidence:
 | Live role/enabled checks complement session roles and CSRF | AdminService.actor, BookingService.lockActor, SecurityConfiguration | Privileged-route and stale-role/disabled-account integration tests |
 | Admin/approver screens and audit use actual API/database | OperationsPanel, workflow.spec.ts | Invalid preview/apply/replay → imported resource booking → approve/cancel/reject → audit browser walkthrough |
 | App restart preserves policy/import/audit/catalogue | check_persistence.py, CI | Authenticated exact before/after comparison across app container restart |
+| Initial metadata cannot overwrite an admin edit | OperationsPanel policy controls | Deferred initial/read-save regression and actual browser saved-policy response assertion; 18 November release repair |
 
 See [workflow contracts and run instructions](ADMIN_WORKFLOWS.md). Test adapters
 are not substituted for PostgreSQL; frontend unit mocks are separate from actual

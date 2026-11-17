@@ -9,6 +9,15 @@ Native audit observations are dated 17 November; publication and release checks
 carried forward to 18 November. Commit and tag timestamps use their actual time.
 No version tag substitutes for the checks.
 
+The first 18 November release CI exposed an administration loading race: initial
+metadata could overwrite a duration edit made before it arrived, producing an
+unchanged save and no policy-change event. Policy controls now wait for loaded
+metadata and remain disabled during a save/refresh. A deferred-response regression
+failed before this repair; the real browser also asserts the saved 120-minute
+policy response. The repaired acceptance commit must pass all checks before tagging.
+The repaired frontend suite has 14 tests; the 17 November native snapshot below
+retains its original 13-test count rather than changing historical observations.
+
 ## Architecture and contract ledger
 
 React → Spring session/CSRF API → transactional PostgreSQL booking, policy, import and audit records.

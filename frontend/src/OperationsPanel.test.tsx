@@ -7,6 +7,39 @@ const invalid = { id: 'batch-1', valid: false, applied: false, inserted: 0, repl
 const ok = (value: unknown) => ({ ok: true, json: async () => value });
 
 describe('operations workspace', () => {
+  it('waits for initial policy metadata and preserves the first user edit through a pending save', async () => {
+    let finishInitial!: (value: ReturnType<typeof ok>) => void;
+    let finishSave!: (value: ReturnType<typeof ok>) => void;
+    let loading = true;
+    let current = policy;
+    const initial = new Promise<ReturnType<typeof ok>>(resolve => { finishInitial = resolve; });
+    const pendingSave = new Promise<ReturnType<typeof ok>>(resolve => { finishSave = resolve; });
+    vi.stubGlobal('fetch', vi.fn().mockImplementation((url: string) =>
+      url.endsWith('/policy') ? (loading ? initial : Promise.resolve(ok(current))) : Promise.resolve(ok([]))));
+    const mutate = vi.fn().mockReturnValue(pendingSave);
+    render(<OperationsPanel role="ADMIN" mutate={mutate} onResourcesChanged={() => {}} />);
+    const minutes = screen.getByLabelText('Maximum duration (minutes)');
+    const approval = screen.getByLabelText('Require approval');
+    expect(minutes).toBeDisabled();
+    expect(approval).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Save policy' })).toBeDisabled();
+    loading = false; finishInitial(ok(policy));
+    await vi.waitFor(() => expect(minutes).toBeEnabled());
+    expect(minutes).toHaveValue(60);
+    fireEvent.change(minutes, { target: { value: '30' } });
+    fireEvent.click(approval);
+    fireEvent.click(screen.getByRole('button', { name: 'Save policy' }));
+    expect(minutes).toBeDisabled();
+    expect(approval).toBeDisabled();
+    expect(JSON.parse(mutate.mock.calls[0][1])).toEqual({ expectedVersion: 4, maxDurationMinutes: 30, approvalRequired: false });
+    current = { version: 5, maxDurationMinutes: 30, approvalRequired: false };
+    finishSave(ok(current));
+    expect(await screen.findByRole('status')).toHaveTextContent('Policy v5 saved');
+    expect(minutes).toHaveValue(30);
+    expect(minutes).toBeEnabled();
+    expect(approval).not.toBeChecked();
+  });
+
   it('keeps policy edits visible when a stale save is rejected and refreshes only on request', async () => {
     vi.stubGlobal('fetch', vi.fn().mockImplementation(async (url: string) => ok(url.endsWith('/policy') ? policy : [])));
     const mutate = vi.fn().mockRejectedValue(new Error('Policy changed. Refresh before saving.'));

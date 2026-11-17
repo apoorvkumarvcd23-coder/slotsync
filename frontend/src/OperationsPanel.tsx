@@ -114,8 +114,8 @@ function Admin({ mutate, onResourcesChanged }: { mutate: Mutate; onResourcesChan
     <form onSubmit={save} aria-label="Booking policy" className="admin-block">
       <h3>Booking policy {policy && <span>v{policy.version}</span>}</h3>
       <p>Applies to new requests. Existing bookings keep their saved policy version. Booking horizon remains one year.</p>
-      <label>Maximum duration (minutes)<input type="number" min="1" max="1440" step="1" required value={minutes} onChange={e => setMinutes(e.target.value)} /></label>
-      <label className="check-label"><input type="checkbox" checked={approval} onChange={e => setApproval(e.target.checked)} />Require approval</label>
+      <label>Maximum duration (minutes)<input type="number" min="1" max="1440" step="1" required disabled={busy || !policy} value={minutes} onChange={e => setMinutes(e.target.value)} /></label>
+      <label className="check-label"><input type="checkbox" disabled={busy || !policy} checked={approval} onChange={e => setApproval(e.target.checked)} />Require approval</label>
       <button disabled={busy || !policy} type="submit">Save policy</button>
     </form>
     <form onSubmit={preview} aria-label="Resource CSV import" className="admin-block">
