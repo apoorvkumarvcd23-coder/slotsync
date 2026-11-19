@@ -43,7 +43,9 @@ Choose future dates when running this example. Timestamps require an explicit
 offset. The service canonicalizes instants to UTC microseconds; equivalent
 timezone offsets produce the same request hash. Fixed guards require a future
 start within 365 days and strictly ordered times. Duration follows the current
-versioned policy (1–1440 minutes). See [admin workflows](ADMIN_WORKFLOWS.md).
+versioned policy (1–1440 minutes). Its configurable 1–365 day start horizon and
+UTC weekly opening schedule also apply. See [weekly policy rules](WEEKLY_POLICY.md)
+and [admin workflows](ADMIN_WORKFLOWS.md).
 
 New requests return 201 and PENDING or APPROVED according to their saved policy;
 both hold the slot. Exact actor/key/payload
@@ -89,8 +91,9 @@ the booking insert, and injected SQLSTATE 40P01 failures to prove whole-transact
 retry and retry-budget rollback. Other tests cover actual session authentication,
 CSRF rotation, ownership, concurrent overlap/replay and cancellation.
 
-## Remaining core
+## Current milestone
 
-Approval decisions, configurable policy snapshots, CSV preview/atomic import,
-approver/admin screens, audit browsing and the complete five-case UAT are still
-pending. No complete-core release tag is earned by the requester slice.
+The complete bounded core was accepted as v0.1.0 on 18 November; see the
+[core evidence ledger](CORE_ACCEPTANCE.md). Current main extends the policy
+workflow with UTC weekly hours and configurable horizon. CSV mapping/updates,
+broader UAT and full December v1 hardening remain.

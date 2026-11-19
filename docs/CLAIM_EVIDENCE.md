@@ -60,3 +60,15 @@ following CORE07 checks extend the original requester evidence:
 See [workflow contracts and run instructions](ADMIN_WORKFLOWS.md). Test adapters
 are not substituted for PostgreSQL; frontend unit mocks are separate from actual
 browser/API checks. No workload throughput or production/business impact is claimed.
+
+
+## Weekly policy extension (XS01)
+
+| Claim | Code | Executable evidence |
+| --- | --- | --- |
+| Admin saves a bounded horizon and UTC days/hours without changing old versions | V5, AdminController, AdminService, OperationsPanel | WorkflowIT weekly bounds, unchanged/stale edit, old policy/replay and legacy-client preservation; OperationsPanel weekly form test |
+| Every occupied UTC date fits opening hours, including exclusive midnight boundaries | PolicySchedule, BookingService.create | WorkflowIT horizon/window and midnight tests; fixed-clock PolicyScheduleTest |
+| Real requester UI sees policy denials/success and existing response replay is preserved | frontend/e2e/policy.spec.ts | Real React/Spring/PostgreSQL browser workflow, reload and desktop/390px screenshots; CI weekly-policy.json |
+
+[Policy contract and repeatable checks](WEEKLY_POLICY.md). The existing core tag
+does not include this later extension; full December v1 gates remain open.

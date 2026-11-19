@@ -134,7 +134,7 @@ export default function BookingPanel({ resources, selectedId, onResourcesChanged
       {session.role !== 'REQUESTER' ? <OperationsPanel key={session.username} role={session.role || ''} mutate={mutate} onResourcesChanged={onResourcesChanged} /> : <>
         <form onSubmit={book} className="booking-form" aria-label="Create booking">
           <h2>Reserve a resource</h2>
-          <p>Enter both times in UTC. The current policy sets the maximum duration and whether approval is required. Pending and approved bookings hold the slot.</p>
+          <p>Enter both times in UTC. The current policy limits duration, booking horizon and UTC opening days/hours, and determines whether approval is required. Pending and approved bookings hold the slot.</p>
           <label>Resource<select aria-label="Booking resource" value={resourceId} onChange={e => setResourceId(e.target.value)} required>
             <option value="">Choose a resource</option>{resources.map(resource => <option key={resource.id} value={resource.id}>{resource.name}</option>)}
           </select></label>

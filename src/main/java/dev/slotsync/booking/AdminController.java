@@ -21,7 +21,7 @@ public class AdminController {
     public ResponseEntity<AdminService.Policy> policy(@AuthenticationPrincipal SlotUser user) {return response(admin.adminPolicy(user.userId()));}
     @PostMapping("/api/admin/policy")
     public ResponseEntity<AdminService.Policy> save(@AuthenticationPrincipal SlotUser user,@Valid @RequestBody PolicyRequest request) {
-        return response(admin.savePolicy(user.userId(),request.expectedVersion(),request.maxDurationMinutes(),request.approvalRequired()));
+        return response(admin.savePolicy(user.userId(),request.expectedVersion(),request.maxDurationMinutes(),request.approvalRequired(),request.horizonDays(),request.openingDays(),request.opensAt(),request.closesAt()));
     }
     @GetMapping("/api/admin/imports")
     public ResponseEntity<List<AdminService.Batch>> imports(@AuthenticationPrincipal SlotUser user) {return response(admin.imports(user.userId()));}
@@ -31,6 +31,8 @@ public class AdminController {
     public ResponseEntity<AdminService.Batch> apply(@AuthenticationPrincipal SlotUser user,@PathVariable UUID id) {return response(admin.apply(user.userId(),id));}
     @GetMapping("/api/admin/audit")
     public ResponseEntity<List<AdminService.AuditView>> audit(@AuthenticationPrincipal SlotUser user) {return response(admin.audit(user.userId()));}
-    public record PolicyRequest(@NotNull @Min(1) Long expectedVersion,@NotNull @Min(1) @Max(1440) Integer maxDurationMinutes,@NotNull Boolean approvalRequired) {}
+    public record PolicyRequest(@NotNull @Min(1) Long expectedVersion,@NotNull @Min(1) @Max(1440) Integer maxDurationMinutes,
+            @NotNull Boolean approvalRequired,@Min(1) @Max(365) Integer horizonDays,
+            @Size(min=1,max=7) List<@NotNull @Min(1) @Max(7) Integer> openingDays,String opensAt,String closesAt) {}
     public record CsvRequest(@NotNull @Size(max=65536) String csv) {}
 }

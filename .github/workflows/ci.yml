@@ -50,6 +50,11 @@ jobs:
           python3 scripts/check_persistence.py --record
           docker compose restart app
           python3 scripts/check_persistence.py
+      - name: Restricted weekly policy and enforcement survive application restart
+        run: |
+          python3 scripts/check_policy_persistence.py --record
+          docker compose restart app
+          python3 scripts/check_policy_persistence.py
       - name: Formal five-case business UAT on real React Spring and PostgreSQL
         working-directory: frontend
         run: npm run test:uat
@@ -69,8 +74,10 @@ jobs:
             target/failsafe-reports/
             frontend/test-results/*.png
             frontend/test-results/workflow.json
+            frontend/test-results/weekly-policy.json
             frontend/test-results/uat.json
             target/workflow-restart.json
+            target/weekly-policy-restart.json
             target/uat-persistence.json
           retention-days: 14
       - name: Stop demo

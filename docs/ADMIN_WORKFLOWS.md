@@ -26,8 +26,9 @@ requester2 for reservations. Passwords/CSRF values are never part of public exam
 
 ## Policy
 
-GET /api/policy is a public, no-store view: version, maxDurationMinutes and
-approvalRequired. GET /api/admin/policy and POST /api/admin/policy require an
+GET /api/policy is a public, no-store view: version, maxDurationMinutes,
+approvalRequired, horizonDays, openingDays, opensAt and closesAt. Times are UTC;
+see [weekly policy semantics and compatibility](WEEKLY_POLICY.md). GET /api/admin/policy and POST /api/admin/policy require an
 enabled administrator session; POST also requires the fresh CSRF header.
 
 POST body:
@@ -36,8 +37,8 @@ POST body:
 ```
 
 Duration must be an integer from 1 to 1440 minutes. approvalRequired must be a
-JSON boolean. Nulls, numeric strings, fractional integers and unknown properties
-are rejected. A stale expectedVersion returns 409 POLICY_CHANGED; refresh and
+JSON boolean. Nulls in required fields, numeric strings, fractional integers and
+unknown properties are rejected. A stale expectedVersion returns 409 POLICY_CHANGED; refresh and
 review before resubmitting. An unchanged save creates no extra version/audit.
 
 Each changed save creates an immutable policy version and atomic POLICY_CHANGED
@@ -46,7 +47,10 @@ Existing reservations keep their version/status; no retrospective cancellation.
 The initial policy is 1440 minutes with approval required. V4 assigns that initial
 version to older bookings; V1–V3 migration bytes remain unchanged.
 
-The one-year future-start horizon and absolute 24-hour cap remain fixed. New
+The absolute 365-day future-start/24-hour cap remains; current versioned policy
+can narrow the horizon, opening weekdays and UTC hours. The initial schedule
+remains all-day/all-week. Optional schedule fields omitted by older clients
+retain their current values. New
 reservations return PENDING when approval is required, otherwise APPROVED.
 Both hold time under the original PostgreSQL exclusion constraint. An existing
 request-key replay returns its original response even after a policy change.

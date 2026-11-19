@@ -1,0 +1,90 @@
+{
+  "observed_at_utc": "2026-11-19T02:29:10.965688+00:00",
+  "date_ist": "2026-11-19",
+  "base_commit": "82b2c56a0064090829e479e71dfd1249e17f1723",
+  "scope": "Native checks of the weekly-policy change set; exact publishing commit is available in Git file history and its separate CI run.",
+  "platform": "Windows",
+  "database": "Actual PostgreSQL 18; Linux/PostgreSQL 17 Docker proof is separate CI.",
+  "checks": {
+    "postgresql_integration": 43,
+    "fixed_clock_horizon_unit": 1,
+    "react_tests": 15,
+    "production_build": "passed",
+    "real_socket_readiness": 2,
+    "real_chromium_scenarios": 6,
+    "formal_uat_cases": 5,
+    "exact_workflow_and_four_role_restart_state": "passed"
+  },
+  "browser": {
+    "status": "passed",
+    "integration": "Actual React/Spring/PostgreSQL and Chromium; no service/browser mocks",
+    "horizonDenied": true,
+    "outsideHoursDenied": true,
+    "exactClosingAccepted": true,
+    "uiReloadRetainsSchedule": true,
+    "originalResponseReplay": true,
+    "mobileOverflow": false,
+    "policy": {
+      "version": 3,
+      "maxDurationMinutes": 120,
+      "approvalRequired": true,
+      "horizonDays": 7,
+      "openingDays": [
+        7
+      ],
+      "opensAt": "09:00",
+      "closesAt": "17:00"
+    },
+    "originalPolicyVersion": 1,
+    "images": [
+      "weekly-policy.png",
+      "weekly-policy-mobile.png"
+    ]
+  },
+  "restricted_policy_restart": {
+    "status": "passed",
+    "integration": "Actual fresh HTTP sessions before/after an invoker-owned app-process restart; same database",
+    "restricted_policy_preserved_exactly": true,
+    "public_policy_matches": true,
+    "post_restart_denials": {
+      "HORIZON_EXCEEDED": true,
+      "OUTSIDE_OPENING_HOURS": true
+    },
+    "policy": {
+      "version": 9,
+      "maxDurationMinutes": 120,
+      "approvalRequired": true,
+      "horizonDays": 7,
+      "openingDays": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ],
+      "opensAt": "09:00",
+      "closesAt": "17:00"
+    },
+    "initial_settings_restored": true,
+    "limits": "Synthetic owned loopback demo. This verifier does not itself restart the process; the invoker must do so."
+  },
+  "actual_owned_restart": {
+    "old_pid": 7684,
+    "new_pid": 41936,
+    "old_exit_code": 1,
+    "method": "Owned Windows app terminated and awaited before replacement; same database, distinct process. This is not a graceful-zero-exit assertion."
+  },
+  "screenshots": [
+    {
+      "path": "evidence/2026-11-19/weekly-policy.png",
+      "sha256": "f500bad9fac14008fa8dacd268cc19371c31fa5e61d20e09e8b2f54f67297f4d"
+    },
+    {
+      "path": "evidence/2026-11-19/weekly-policy-mobile.png",
+      "sha256": "e5faca8adbdbe64562bcd812fb4ed8cc0bd921e8d09fc89f3dbd28fa770783ac"
+    }
+  ],
+  "limits": "Synthetic loopback demo; fixed UTC weekly window. No new release tag, benchmark, production scale or full December v1 claim."
+}

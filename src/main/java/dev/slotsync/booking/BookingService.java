@@ -62,6 +62,11 @@ public class BookingService {
             var rule = jdbc.queryForMap("SELECT * FROM policy_versions WHERE id=?", policy);
             if (Duration.between(starts, ends).compareTo(Duration.ofMinutes(((Number) rule.get("max_duration_minutes")).longValue())) > 0)
                 throw error(400, "DURATION_EXCEEDED", "This interval exceeds the current maximum duration.");
+            PolicySchedule schedule = new PolicySchedule(((Number)rule.get("horizon_days")).intValue(),
+                    PolicySchedule.days(((Number)rule.get("opening_days_mask")).intValue()),
+                    PolicySchedule.time(((Number)rule.get("opens_at_minute")).intValue()),
+                    PolicySchedule.time(((Number)rule.get("closes_at_minute")).intValue()));
+            schedule.check(starts, ends, now);
             String initialStatus = Boolean.TRUE.equals(rule.get("approval_required")) ? "PENDING" : "APPROVED";
             UUID id = UUID.randomUUID();
             jdbc.update("INSERT INTO bookings(id,resource_id,owner_id,starts_at,ends_at,status,policy_version_id) VALUES (?,?,?,?,?,?,?)",

@@ -2,9 +2,11 @@
 
 Configurable room and equipment booking with transactional conflict prevention.
 
-**Status: bounded core audited on 17 November 2026.** Requester, approver and admin
-workflows and five-case UAT pass. See the [core acceptance/claim ledger](docs/CORE_ACCEPTANCE.md)
-for clean-clone evidence and the CI gate required before the v0.1.0 tag.
+**Status: v0.1.0 core accepted on 18 November 2026.** See the
+[immutable release/CI ledger](https://github.com/apoorvkumarvcd23-coder/apoorvkumarvcd23-coder/blob/main/docs/CORE_RELEASES_2026-11-18.md)
+and [core contract](docs/CORE_ACCEPTANCE.md). Current main adds configurable UTC
+weekly opening hours and booking horizon through the [versioned policy workflow](docs/WEEKLY_POLICY.md);
+the existing v0.1.0 tag remains the bounded core. Full v1 gates remain open.
 
 Java 21 / Spring Boot 3.5.16 serves a React/TypeScript resource screen from the
 same origin. Flyway creates a PostgreSQL 17 schema and three synthetic room/kit
@@ -55,7 +57,7 @@ docker compose down
 See [the runbook](docs/RUNBOOK.md) for checks, development, restart and failure
 diagnosis, and [the evidence ledger](docs/CLAIM_EVIDENCE.md) for implemented scope.
 The [booking API guide](docs/BOOKING_API.md) documents sessions, request keys,
-conflict responses and the fixed horizon/configurable duration limits.
+conflict responses and the configurable horizon/duration/opening limits.
 
 ## Checks
 
@@ -98,4 +100,5 @@ Testcontainers suite and the browser against the same-origin Docker application.
 
 The 17 November [core audit](docs/CORE_ACCEPTANCE.md) maps the complete bounded
 workflow to actual code, tests and evidence. v0.1.0 is the core milestone;
-December's richer policy/import rules and full v1.0.0 hardening remain separate.
+Weekly horizon/opening configuration extends current main; richer imports,
+exception calendars and full v1.0.0 hardening remain separate.

@@ -12,6 +12,14 @@ load testing and full v1 hardening follow afterwards. A health endpoint alone
 is not the resume-ready core. The detailed table below describes full v1
 capabilities; partial core slices do not automatically complete every v1 item.
 
+## Current extension — XS01
+
+Current main adds [versioned UTC weekly opening hours and booking horizon](WEEKLY_POLICY.md):
+admin configuration, prospective booking enforcement, historical policy/replay
+preservation and executable HTTP/browser regressions. v0.1.0 was accepted
+18 November; its tag is unchanged. Exception calendars, campus-local time zones,
+split/overnight windows and full v1 acceptance remain outside this increment.
+
 ## Starting point and purpose
 
 ### Core acceptance — 17 November 2026

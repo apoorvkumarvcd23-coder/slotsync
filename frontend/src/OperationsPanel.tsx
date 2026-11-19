@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 
 type Mutate = (path: string, body?: string) => Promise<Response>;
-type Policy = { version: number; maxDurationMinutes: number; approvalRequired: boolean };
+type Policy = { version: number; maxDurationMinutes: number; approvalRequired: boolean;
+  horizonDays: number; openingDays: number[]; opensAt: string; closesAt: string };
+const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 type Batch = { id: string; valid: boolean; applied: boolean; inserted: number; replayed: boolean;
   preview: { inputRows: number; acceptedRows: number; rejectedRows: number;
     rows: { row: number; code: string; name: string; type: string; location: string; capacity: number }[];
@@ -21,7 +23,10 @@ function describeChange(value: string): string {
     const detail = JSON.parse(value) as { from?: string | null; to?: string; previousVersion?: number;
       policy?: Policy; inputRows?: number; inserted?: number };
     if (detail.policy) return 'Policy v' + detail.previousVersion + ' → v' + detail.policy.version
-      + ' · maximum ' + detail.policy.maxDurationMinutes + ' minutes · approval ' + (detail.policy.approvalRequired ? 'required' : 'automatic');
+      + ' · maximum ' + detail.policy.maxDurationMinutes + ' minutes · approval ' + (detail.policy.approvalRequired ? 'required' : 'automatic')
+      + (detail.policy.horizonDays ? ' · ' + detail.policy.horizonDays + '-day horizon · UTC '
+        + detail.policy.opensAt + '–' + detail.policy.closesAt + ' · '
+        + detail.policy.openingDays.map(d => weekdays[d - 1]).join(', ') : '');
     if (typeof detail.to === 'string') return (detail.from || 'New booking') + ' → ' + detail.to;
     if (typeof detail.inserted === 'number') return detail.inserted + ' of ' + detail.inputRows + ' resources imported';
   } catch { /* Unknown historical details stay opaque rather than rendering raw payloads. */ }
@@ -66,6 +71,10 @@ function Admin({ mutate, onResourcesChanged }: { mutate: Mutate; onResourcesChan
   const [policy, setPolicy] = useState<Policy | null>(null);
   const [minutes, setMinutes] = useState('1440');
   const [approval, setApproval] = useState(true);
+  const [horizon, setHorizon] = useState('365');
+  const [days, setDays] = useState<number[]>([1, 2, 3, 4, 5, 6, 7]);
+  const [opens, setOpens] = useState('00:00');
+  const [closes, setCloses] = useState('24:00');
   const [csv, setCsv] = useState('code,name,type,location,capacity\nROOM-CEDAR,Cedar studio,ROOM,Demo campus / East wing,12');
   const [batch, setBatch] = useState<Batch | null>(null);
   const [recent, setRecent] = useState<Batch[]>([]);
@@ -75,7 +84,9 @@ function Admin({ mutate, onResourcesChanged }: { mutate: Mutate; onResourcesChan
   const [notice, setNotice] = useState('');
   async function refresh() {
     const [p, imports, events] = await Promise.all([read<Policy>('/api/admin/policy'), read<Batch[]>('/api/admin/imports'), read<Audit[]>('/api/admin/audit')]);
-    setPolicy(p); setMinutes(String(p.maxDurationMinutes)); setApproval(p.approvalRequired); setRecent(imports); setAudit(events);
+    setPolicy(p); setMinutes(String(p.maxDurationMinutes)); setApproval(p.approvalRequired);
+    setHorizon(String(p.horizonDays)); setDays(p.openingDays); setOpens(p.opensAt); setCloses(p.closesAt);
+    setRecent(imports); setAudit(events);
   }
   useEffect(() => { void refresh().catch(f => setError((f as Error).message)); }, []);
   async function act(work: () => Promise<void>) {
@@ -87,7 +98,9 @@ function Admin({ mutate, onResourcesChanged }: { mutate: Mutate; onResourcesChan
     event.preventDefault();
     await act(async () => {
       if (!policy || !/^[1-9][0-9]{0,3}$/.test(minutes) || Number(minutes) > 1440) throw new Error('Enter a maximum duration from 1 to 1440 minutes.');
-      const p = await (await mutate('/api/admin/policy', JSON.stringify({ expectedVersion: policy.version, maxDurationMinutes: Number(minutes), approvalRequired: approval }))).json() as Policy;
+      if (!/^[1-9][0-9]{0,2}$/.test(horizon) || Number(horizon) > 365 || days.length === 0) throw new Error('Choose a 1–365 day horizon and at least one opening day.');
+      const p = await (await mutate('/api/admin/policy', JSON.stringify({ expectedVersion: policy.version, maxDurationMinutes: Number(minutes), approvalRequired: approval,
+        horizonDays: Number(horizon), openingDays: days, opensAt: opens, closesAt: closes }))).json() as Policy;
       await refresh(); setNotice('Policy v' + p.version + ' saved. Existing bookings keep their original policy.');
     });
   }
@@ -113,8 +126,18 @@ function Admin({ mutate, onResourcesChanged }: { mutate: Mutate; onResourcesChan
     {!policy && !error && <p role="status">Loading administration…</p>}
     <form onSubmit={save} aria-label="Booking policy" className="admin-block">
       <h3>Booking policy {policy && <span>v{policy.version}</span>}</h3>
-      <p>Applies to new requests. Existing bookings keep their saved policy version. Booking horizon remains one year.</p>
+      <p>Applies to new requests. Existing bookings keep their saved policy version. Opening days and hours use UTC. The horizon limits the start time; closing is exclusive.</p>
       <label>Maximum duration (minutes)<input type="number" min="1" max="1440" step="1" required disabled={busy || !policy} value={minutes} onChange={e => setMinutes(e.target.value)} /></label>
+      <label>Booking horizon (days)<input type="number" min="1" max="365" step="1" required disabled={busy || !policy} value={horizon} onChange={e => setHorizon(e.target.value)} /></label>
+      <fieldset disabled={busy || !policy}><legend>Opening days (UTC)</legend>
+        {weekdays.map((name, i) => <label className="check-label" key={name}><input type="checkbox" checked={days.includes(i + 1)}
+          onChange={e => setDays(e.target.checked ? [...days, i + 1].sort((a, b) => a - b) : days.filter(d => d !== i + 1))} />{name}</label>)}
+      </fieldset>
+      <div className="time-fields">
+        <label>Opening time (UTC)<input type="time" required disabled={busy || !policy} value={opens} onChange={e => setOpens(e.target.value)} /></label>
+        <label>Closing time (UTC)<input type="text" pattern="[0-9]{2}:[0-9]{2}" placeholder="24:00" required disabled={busy || !policy} value={closes} onChange={e => setCloses(e.target.value)} /></label>
+      </div>
+      <p>One daily window; use 24:00 to close at midnight. Overnight windows are not supported. For 24-hour opening, choose 00:00–24:00.</p>
       <label className="check-label"><input type="checkbox" disabled={busy || !policy} checked={approval} onChange={e => setApproval(e.target.checked)} />Require approval</label>
       <button disabled={busy || !policy} type="submit">Save policy</button>
     </form>

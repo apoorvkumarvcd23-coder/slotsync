@@ -33,23 +33,30 @@ public class AdminService {
     }
     public Policy currentPolicy() {
         return jdbc.queryForObject("SELECT v.* FROM policy_versions v JOIN policy_current c ON c.version_id=v.id",
-                (rs,row)->new Policy(rs.getLong("id"),rs.getInt("max_duration_minutes"),rs.getBoolean("approval_required")));
+                (rs,row)->new Policy(rs.getLong("id"),rs.getInt("max_duration_minutes"),rs.getBoolean("approval_required"),
+                        rs.getInt("horizon_days"),PolicySchedule.days(rs.getInt("opening_days_mask")),
+                        PolicySchedule.time(rs.getInt("opens_at_minute")),PolicySchedule.time(rs.getInt("closes_at_minute"))));
     }
     public Policy adminPolicy(UUID actor) {
         return transaction.execute(status->{ actor(actor,"ADMIN"); return currentPolicy(); });
     }
-    public Policy savePolicy(UUID actor,long expectedVersion,int maxMinutes,boolean approvalRequired) {
+    public Policy savePolicy(UUID actor,long expectedVersion,int maxMinutes,boolean approvalRequired,
+            Integer horizonDays,List<Integer> openingDays,String opensAt,String closesAt) {
         if(maxMinutes<1 || maxMinutes>1440) throw error(400,"INVALID_POLICY","Maximum duration must be 1–1440 minutes.");
         return transaction.execute(status->{
             actor(actor,"ADMIN");
             long previous=jdbc.queryForObject("SELECT version_id FROM policy_current FOR UPDATE",Long.class);
             if(previous!=expectedVersion) throw error(409,"POLICY_CHANGED","Policy changed. Refresh before saving.");
             Policy old=currentPolicy();
-            if(old.maxDurationMinutes()==maxMinutes && old.approvalRequired()==approvalRequired) return old;
-            long id=jdbc.queryForObject("INSERT INTO policy_versions(max_duration_minutes,approval_required,created_by) VALUES (?,?,?) RETURNING id",
-                    Long.class,maxMinutes,approvalRequired,actor);
+            PolicySchedule schedule=new PolicySchedule(horizonDays==null?old.horizonDays():horizonDays,
+                    openingDays==null?old.openingDays():openingDays,opensAt==null?old.opensAt():opensAt,closesAt==null?old.closesAt():closesAt);
+            if(old.maxDurationMinutes()==maxMinutes && old.approvalRequired()==approvalRequired && old.schedule().equals(schedule)) return old;
+            long id=jdbc.queryForObject("""
+                    INSERT INTO policy_versions(max_duration_minutes,approval_required,created_by,horizon_days,opening_days_mask,opens_at_minute,closes_at_minute)
+                    VALUES (?,?,?,?,?,?,?) RETURNING id
+                    """,Long.class,maxMinutes,approvalRequired,actor,schedule.horizonDays(),schedule.mask(),schedule.openMinute(),schedule.closeMinute());
             jdbc.update("UPDATE policy_current SET version_id=?",id);
-            Policy next=new Policy(id,maxMinutes,approvalRequired);
+            Policy next=new Policy(id,maxMinutes,approvalRequired,schedule.horizonDays(),schedule.openingDays(),schedule.opensAt(),schedule.closesAt());
             audit(actor,"POLICY_CHANGED",Long.toString(id),encode(Map.of("previousVersion",previous,"policy",next)));
             return next;
         });
@@ -192,7 +199,10 @@ public class AdminService {
         try {return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8)));}
         catch(java.security.NoSuchAlgorithmException failure) {throw new IllegalStateException(failure);}
     }
-    public record Policy(long version,int maxDurationMinutes,boolean approvalRequired) {}
+    public record Policy(long version,int maxDurationMinutes,boolean approvalRequired,int horizonDays,
+            List<Integer> openingDays,String opensAt,String closesAt) {
+        PolicySchedule schedule() { return new PolicySchedule(horizonDays,openingDays,opensAt,closesAt); }
+    }
     public record ImportRow(int row,String code,String name,String type,String location,int capacity) {}
     public record RowError(int row,String message) {}
     public record Preview(int inputRows,int acceptedRows,int rejectedRows,List<ImportRow> rows,List<RowError> errors) {}

@@ -21,7 +21,8 @@ roles and live database account checks. Unimplemented routes stay closed. See
 V1 creates resource types, resources, users and bookings. No passwords are
 committed. V2 adds only synthetic campus resources. V3 adds actor-scoped
 replay responses and audit events. V4 adds prospective policy versions, import
-batches and admin audit events without modifying V1–V3. Optional demo accounts are seeded
+batches and admin audit events without modifying V1–V3. V5 adds constrained UTC
+weekly opening and horizon fields with legacy all-day defaults; V1–V4 remain unchanged. Optional demo accounts are seeded
 with BCrypt hashes when the Docker configuration enables them. JPA
 validates its mapped schema rather than creating tables. Flyway history owns
 migration versions; never edit an applied migration once published.

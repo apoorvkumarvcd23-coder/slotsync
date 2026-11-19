@@ -1,7 +1,8 @@
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import OperationsPanel from './OperationsPanel';
-const policy = { version: 4, maxDurationMinutes: 60, approvalRequired: true };
+const schedule = { horizonDays: 365, openingDays: [1, 2, 3, 4, 5, 6, 7], opensAt: '00:00', closesAt: '24:00' };
+const policy = { version: 4, maxDurationMinutes: 60, approvalRequired: true, ...schedule };
 const invalid = { id: 'batch-1', valid: false, applied: false, inserted: 0, replayed: false,
   preview: { inputRows: 2, acceptedRows: 1, rejectedRows: 1, rows: [], errors: [{ row: 3, message: 'Duplicate code in this CSV.' }] } };
 const ok = (value: unknown) => ({ ok: true, json: async () => value });
@@ -31,13 +32,40 @@ describe('operations workspace', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save policy' }));
     expect(minutes).toBeDisabled();
     expect(approval).toBeDisabled();
-    expect(JSON.parse(mutate.mock.calls[0][1])).toEqual({ expectedVersion: 4, maxDurationMinutes: 30, approvalRequired: false });
-    current = { version: 5, maxDurationMinutes: 30, approvalRequired: false };
+    expect(JSON.parse(mutate.mock.calls[0][1])).toEqual({ expectedVersion: 4, maxDurationMinutes: 30, approvalRequired: false, ...schedule });
+    current = { version: 5, maxDurationMinutes: 30, approvalRequired: false, ...schedule };
     finishSave(ok(current));
     expect(await screen.findByRole('status')).toHaveTextContent('Policy v5 saved');
     expect(minutes).toHaveValue(30);
     expect(minutes).toBeEnabled();
     expect(approval).not.toBeChecked();
+  });
+
+  it('submits weekly hours and horizon and blocks an empty week without losing edits', async () => {
+    let current = policy;
+    vi.stubGlobal('fetch', vi.fn().mockImplementation(async (url: string) => ok(url.endsWith('/policy') ? current : [])));
+    const mutate = vi.fn().mockImplementation(async (_url: string, body: string) => {
+      const { expectedVersion, ...changes } = JSON.parse(body);
+      current = { ...changes, version: expectedVersion + 1 };
+      return ok(current);
+    });
+    render(<OperationsPanel role="ADMIN" mutate={mutate} onResourcesChanged={() => {}} />);
+    await screen.findByText('v4');
+    fireEvent.change(screen.getByLabelText('Booking horizon (days)'), { target: { value: '14' } });
+    fireEvent.change(screen.getByLabelText('Opening time (UTC)'), { target: { value: '09:00' } });
+    fireEvent.change(screen.getByLabelText('Closing time (UTC)'), { target: { value: '17:00' } });
+    for (const day of ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']) fireEvent.click(screen.getByLabelText(day));
+    fireEvent.click(screen.getByRole('button', { name: 'Save policy' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('at least one opening day');
+    expect(mutate).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByLabelText('Monday'));
+    fireEvent.click(screen.getByRole('button', { name: 'Save policy' }));
+    expect(await screen.findByRole('status')).toHaveTextContent('Policy v5 saved');
+    expect(JSON.parse(mutate.mock.calls[0][1])).toEqual({ expectedVersion: 4, maxDurationMinutes: 60, approvalRequired: true,
+      horizonDays: 14, openingDays: [1], opensAt: '09:00', closesAt: '17:00' });
+    expect(screen.getByLabelText('Booking horizon (days)')).toHaveValue(14);
+    expect(screen.getByLabelText('Monday')).toBeChecked();
+    expect(screen.getByLabelText('Tuesday')).not.toBeChecked();
   });
 
   it('keeps policy edits visible when a stale save is rejected and refreshes only on request', async () => {
@@ -51,7 +79,7 @@ describe('operations workspace', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save policy' }));
     expect(await screen.findByRole('alert')).toHaveTextContent('Policy changed');
     expect(minutes).toHaveValue(30);
-    expect(JSON.parse(mutate.mock.calls[0][1])).toEqual({ expectedVersion: 4, maxDurationMinutes: 30, approvalRequired: false });
+    expect(JSON.parse(mutate.mock.calls[0][1])).toEqual({ expectedVersion: 4, maxDurationMinutes: 30, approvalRequired: false, ...schedule });
     fireEvent.click(screen.getByRole('button', { name: 'Refresh workspace' }));
     await vi.waitFor(() => expect(minutes).toHaveValue(60));
   });

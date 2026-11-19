@@ -226,6 +226,96 @@ class WorkflowIT {
         mvc.perform(auth(get("/api/approvals"),approver)).andExpect(status().isForbidden());
     }
 
+
+    @Test void weeklyPolicyBoundsAndTypesRejectWithoutPartialVersions() throws Exception {
+        Session admin=login("admin");
+        Map<String,Object> valid=Map.of("expectedVersion",1,"maxDurationMinutes",1440,"approvalRequired",true,
+                "horizonDays",7,"openingDays",List.of(1,2,3,4,5),"opensAt","09:00","closesAt","17:00");
+        var bad=new ArrayList<Map<String,Object>>();
+        for(Object horizon:List.of(0,366,1.5,"7")) {var v=new HashMap<>(valid);v.put("horizonDays",horizon);bad.add(v);}
+        for(Object days:List.of(List.of(),List.of(0),List.of(8),List.of(1,1),List.of("1"),List.of(1.5))) {
+            var v=new HashMap<>(valid);v.put("openingDays",days);bad.add(v);
+        }
+        for(String[] times:List.of(new String[]{"24:00","24:00"},new String[]{"17:00","09:00"},
+                new String[]{"09:00","09:00"},new String[]{"9:00","17:00"},new String[]{"09:00","24:01"},new String[]{"09:00","17:00:00"})) {
+            var v=new HashMap<>(valid);v.put("opensAt",times[0]);v.put("closesAt",times[1]);bad.add(v);
+        }
+        for(var payload:bad) assertThat(post(admin,"/api/admin/policy",json.writeValueAsString(payload)).getResponse().getStatus()).isEqualTo(400);
+        assertThat(count("policy_versions")).isEqualTo(1);
+        assertThat(count("admin_audit_events")).isZero();
+        assertThat(body(policy(admin,1,1440,true)).get("openingDays").size()).isEqualTo(7);
+        assertThat(body(policy(admin,1,1440,true)).get("closesAt").asText()).isEqualTo("24:00");
+    }
+
+    @Test void horizonAndUtcWindowBoundariesAreEnforcedBeforeAnyWrites() throws Exception {
+        Session admin=login("admin"),alice=login("alice");
+        Instant day=Instant.now().plus(3,ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS);
+        int weekday=day.atOffset(java.time.ZoneOffset.UTC).getDayOfWeek().getValue();
+        long v=body(schedule(admin,1,1,List.of(weekday),"09:00","17:00")).get("version").asLong();
+        MvcResult horizon=interval(alice,"horizon-boundary",day.plus(9,ChronoUnit.HOURS),day.plus(10,ChronoUnit.HOURS));
+        assertThat(body(horizon).get("code").asText()).isEqualTo("HORIZON_EXCEEDED");
+        schedule(admin,v,7,List.of(weekday),"09:00","17:00");
+        for(Instant[] interval:List.of(
+                new Instant[]{day.plus(539,ChronoUnit.MINUTES),day.plus(10,ChronoUnit.HOURS)},
+                new Instant[]{day.plus(16,ChronoUnit.HOURS),day.plus(17,ChronoUnit.HOURS).plusNanos(1000)},
+                new Instant[]{day.plus(1,ChronoUnit.DAYS).plus(10,ChronoUnit.HOURS),day.plus(1,ChronoUnit.DAYS).plus(11,ChronoUnit.HOURS)})) {
+            MvcResult rejected=interval(alice,UUID.randomUUID().toString(),interval[0],interval[1]);
+            assertThat(rejected.getResponse().getStatus()).isEqualTo(400);
+            assertThat(body(rejected).get("code").asText()).isEqualTo("OUTSIDE_OPENING_HOURS");
+        }
+        assertThat(count("audit_events")).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM idempotency_requests",Integer.class)).isZero();
+        assertThat(interval(alice,"opening-boundary",day.plus(9,ChronoUnit.HOURS),day.plus(10,ChronoUnit.HOURS)).getResponse().getStatus()).isEqualTo(201);
+        assertThat(interval(alice,"closing-boundary",day.plus(16,ChronoUnit.HOURS),day.plus(17,ChronoUnit.HOURS)).getResponse().getStatus()).isEqualTo(201);
+    }
+
+    @Test void newScheduleKeepsHistoricalPolicyAndOriginalReplayAndLegacyEditsKeepSchedule() throws Exception {
+        Session admin=login("admin"),alice=login("alice");
+        Instant start=Instant.now().plus(3,ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS).plus(23,ChronoUnit.HOURS);
+        Instant end=start.plus(2,ChronoUnit.HOURS);
+        MvcResult original=interval(alice,"old-schedule-replay",start,end);
+        assertThat(original.getResponse().getStatus()).isEqualTo(201);
+        String id=body(original).get("id").asText();
+        long v=body(schedule(admin,1,2,List.of(1,2,3,4,5),"09:00","17:00")).get("version").asLong();
+        assertThat(interval(alice,"old-schedule-replay",start,end).getResponse().getContentAsString()).isEqualTo(original.getResponse().getContentAsString());
+        assertThat(jdbc.queryForObject("SELECT policy_version_id FROM bookings WHERE id=?::uuid",Long.class,id)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT horizon_days FROM policy_versions WHERE id=1",Integer.class)).isEqualTo(365);
+        JsonNode legacy=body(policy(admin,v,60,false));
+        assertThat(legacy.get("horizonDays").asInt()).isEqualTo(2);
+        assertThat(legacy.get("openingDays").size()).isEqualTo(5);
+        assertThat(legacy.get("opensAt").asText()).isEqualTo("09:00");
+        assertThat(legacy.get("closesAt").asText()).isEqualTo("17:00");
+        assertThat(body(interval(alice,"new-schedule-denied",start,start.plus(30,ChronoUnit.MINUTES))).get("code").asText()).isEqualTo("HORIZON_EXCEEDED");
+        assertThat(count("audit_events")).isEqualTo(1);
+        assertThat(count("admin_audit_events")).isEqualTo(2);
+        long current=legacy.get("version").asLong();
+        var unchanged=Map.of("expectedVersion",current,"maxDurationMinutes",60,"approvalRequired",false,
+                "horizonDays",2,"openingDays",List.of(5,4,3,2,1),"opensAt","09:00","closesAt","17:00");
+        assertThat(body(post(admin,"/api/admin/policy",json.writeValueAsString(unchanged))).get("version").asLong()).isEqualTo(current);
+        assertThat(schedule(admin,v,7,List.of(1),"10:00","18:00").getResponse().getStatus()).isEqualTo(409);
+    }
+
+    @Test void exclusiveMidnightEndDoesNotRequireNextDayButCrossingDoes() throws Exception {
+        Session admin=login("admin"),alice=login("alice");
+        Instant day=Instant.now().plus(3,ChronoUnit.DAYS).truncatedTo(ChronoUnit.DAYS);
+        int weekday=day.atOffset(java.time.ZoneOffset.UTC).getDayOfWeek().getValue();
+        schedule(admin,1,7,List.of(weekday),"00:00","24:00");
+        assertThat(interval(alice,"midnight-exclusive",day.plus(23,ChronoUnit.HOURS),day.plus(1,ChronoUnit.DAYS)).getResponse().getStatus()).isEqualTo(201);
+        MvcResult cross=interval(alice,"midnight-crossing",day.plus(22,ChronoUnit.HOURS),day.plus(1,ChronoUnit.DAYS).plus(1,ChronoUnit.HOURS));
+        assertThat(cross.getResponse().getStatus()).isEqualTo(400);
+        assertThat(body(cross).get("code").asText()).isEqualTo("OUTSIDE_OPENING_HOURS");
+    }
+
+    private MvcResult schedule(Session s,long expected,int horizon,List<Integer> days,String opens,String closes) throws Exception {
+        return post(s,"/api/admin/policy",json.writeValueAsString(Map.of("expectedVersion",expected,"maxDurationMinutes",1440,
+                "approvalRequired",true,"horizonDays",horizon,"openingDays",days,"opensAt",opens,"closesAt",closes)));
+    }
+    private MvcResult interval(Session s,String key,Instant start,Instant end) throws Exception {
+        return mvc.perform(auth(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/api/bookings"),s)
+                .header("Idempotency-Key",key).contentType("application/json")
+                .content(json.writeValueAsString(Map.of("resourceId",ROOM,"startsAt",start.toString(),"endsAt",end.toString())))).andReturn();
+    }
+
     private Session login(String username) throws Exception {
         MvcResult initial=mvc.perform(get("/api/session")).andReturn();
         JsonNode token=body(initial);
